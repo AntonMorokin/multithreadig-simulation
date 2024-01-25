@@ -3,17 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTSim.Host", "MTSim.Host\MTSim.Host.csproj", "{D941BFB8-C680-4C1E-AD3E-3E5157F55E37}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MTSim.Host", "MTSim.Host\MTSim.Host.csproj", "{D941BFB8-C680-4C1E-AD3E-3E5157F55E37}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTSim.Common", "MTSim.Common\MTSim.Common.csproj", "{6A3643E5-961F-4052-8BD9-EB62D8775B1D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MTSim.Common", "MTSim.Common\MTSim.Common.csproj", "{6A3643E5-961F-4052-8BD9-EB62D8775B1D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTSim.Configuration", "MTSim.Configuration\MTSim.Configuration.csproj", "{CECE2625-EB32-4711-8BA2-3B2E2BF857C7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MTSim.Configuration", "MTSim.Configuration\MTSim.Configuration.csproj", "{CECE2625-EB32-4711-8BA2-3B2E2BF857C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTSim.Map", "MTSim.Map\MTSim.Map.csproj", "{6B6642FC-A313-4FF2-9962-BD160D1096FC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MTSim.Map", "MTSim.Map\MTSim.Map.csproj", "{6B6642FC-A313-4FF2-9962-BD160D1096FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTSim.Objects", "MTSim.Objects\MTSim.Objects.csproj", "{986AEDA6-C92C-48E8-A18D-E9493052B3C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MTSim.Objects", "MTSim.Objects\MTSim.Objects.csproj", "{986AEDA6-C92C-48E8-A18D-E9493052B3C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTSim.Utils", "MTSim.Utils\MTSim.Utils.csproj", "{9B542A07-61EE-4354-90EB-9E66F25B54B4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MTSim.Utils", "MTSim.Utils\MTSim.Utils.csproj", "{9B542A07-61EE-4354-90EB-9E66F25B54B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTSim.Objects.Abstraction", "MTSim.Objects.Abstraction\MTSim.Objects.Abstraction.csproj", "{BA9128C8-9854-441C-B049-A69CEF162C02}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{9B542A07-61EE-4354-90EB-9E66F25B54B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B542A07-61EE-4354-90EB-9E66F25B54B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B542A07-61EE-4354-90EB-9E66F25B54B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA9128C8-9854-441C-B049-A69CEF162C02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA9128C8-9854-441C-B049-A69CEF162C02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA9128C8-9854-441C-B049-A69CEF162C02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA9128C8-9854-441C-B049-A69CEF162C02}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,4 +1,4 @@
-﻿namespace MTSim.Objects.Animals.Predators
+﻿namespace MTSim.Objects.Abstraction.Animals.Predators
 {
     public abstract class Predator : Animal
     {

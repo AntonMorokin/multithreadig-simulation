@@ -1,4 +1,4 @@
-﻿namespace MTSim.Objects.Plants
+﻿namespace MTSim.Objects.Abstraction.Plants
 {
     public abstract class Plant : GameObject
     {

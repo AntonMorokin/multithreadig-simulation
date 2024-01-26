@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MTSim.Map\MTSim.Map.csproj" />
     <ProjectReference Include="..\MTSim.Objects.Abstraction\MTSim.Objects.Abstraction.csproj" />
   </ItemGroup>
 

@@ -5,19 +5,28 @@ using System.Linq;
 
 namespace MTSim.Map
 {
-    public sealed class Location
+    internal sealed class Location
     {
         private readonly LinkedList<GameObject> _objects = new();
         private readonly Dictionary<long, LinkedListNode<GameObject>> _objectsMap = new(64);
 
         private readonly object _sync = new();
 
+        /// <summary>
+        /// Координаты на острове
+        /// </summary>
+        public Point Coords { get; }
+
+        /// <summary>
+        /// Количество объектов в локации
+        /// </summary>
         public int ObjectsCount => _objects.Count;
 
+        /// <summary>
+        /// Вместимость локации
+        /// </summary>
         // TODO add different constrains by different types
         public int Capacity { get; }
-
-        public Point Coords { get; }
 
         public Location(Point coords, int capacity)
         {
@@ -46,7 +55,6 @@ namespace MTSim.Map
 
         private static void AddInternal(Location location, GameObject obj)
         {
-            // TODO do we need synchronized access here?
             var node = location._objects.AddLast(obj);
             location._objectsMap.Add(obj.Id, node);
         }

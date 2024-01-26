@@ -7,8 +7,14 @@ namespace MTSim.Map
         private readonly object _sync = new();
         private readonly Location[,] _map;
 
+        /// <summary>
+        /// Длина острова
+        /// </summary>
         public int Width { get; }
 
+        /// <summary>
+        /// Ширина острова
+        /// </summary>
         public int Height { get; }
 
         public Island(int width, int height)
@@ -34,29 +40,35 @@ namespace MTSim.Map
             }
         }
 
-        public Location Get(in Point coords)
+        public void Add(GameObject obj, in Point coords)
         {
-            return _map[coords.Y, coords.X];
+            var location = Get(coords);
+            location.Add(obj);
         }
 
         public void Move(GameObject obj, in Point oldLocation, in Point newLocation)
         {
-            Location oldLoc;
-            lock (_sync)
-            {
-                oldLoc = _map[oldLocation.Y, oldLocation.X];
-            }
-
-            // To prevent deadlocks don't try to take one lock (Location._sync) from another (Island._sync)
+            var oldLoc = Get(oldLocation);
             oldLoc.Remove(obj);
 
-            Location newLoc;
+            var newLoc = Get(newLocation);
+            newLoc.Add(obj);
+        }
+
+        public T GetRandomOf<T>(in Point coords)
+            where T : GameObject
+        {
+            var location = Get(coords);
+            return location.GetRandomOf<T>();
+        }
+
+        private Location Get(in Point coords)
+        {
+            // To prevent deadlocks don't try to take one lock (Location._sync) from another (Island._sync)
             lock (_sync)
             {
-                newLoc = _map[newLocation.Y, newLocation.X];
+                return _map[coords.Y, coords.X];
             }
-
-            newLoc.Add(obj);
         }
     }
 }

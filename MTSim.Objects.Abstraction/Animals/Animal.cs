@@ -17,9 +17,9 @@
         /// </summary>
         protected decimal FullSatiety { get; }
 
-        public abstract void Eat(GameObject toEat);
+        public abstract void Eat();
 
-        public abstract void Fuck(Animal toFuckWith);
+        public abstract void Fuck();
 
         public abstract void Move();
     }

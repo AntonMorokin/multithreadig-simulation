@@ -1,0 +1,38 @@
+{
+	"island": {
+		"width": 30,
+		"height": 20
+	},
+	"animals": {
+		"Caterpillar": {
+			"weight": 0.01,
+			"maxSpeed": 0,
+			"maxSatiety": 0.01,
+			"maxCountOnLocation": 20
+		},
+		"Duck": {
+			"weight": 3.0,
+			"maxSpeed": 4,
+			"maxSatiety": 0.15,
+			"maxCountOnLocation": 10
+		},
+		"Fox": {
+			"weight": 8.0,
+			"maxSpeed": 2,
+			"maxSatiety": 3.0,
+			"maxCountOnLocation": 3
+		},
+		"Wolf": {
+			"weight": 50.0,
+			"maxSpeed": 3,
+			"maxSatiety": 8.0,
+			"maxCountOnLocation": 3
+		}
+	},
+	"plants": {
+		"Grass": {
+			"weight": 1.0,
+			"growSpeed": 0.75
+		}
+	}
+}

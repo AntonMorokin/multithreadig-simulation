@@ -34,16 +34,61 @@ namespace MTSim.Map
             Capacity = capacity;
         }
 
-        public T GetRandomOf<T>()
-            where T : GameObject
+        // For moving
+        public bool AnyOfExcept(HashSet<string> typeNames, GameObject except)
         {
-            return ExecSafe(this, GetRandomOfInternal<T>);
+            return ExecSafe(this, typeNames, except, AnyOfExceptInternal);
         }
 
-        private static T GetRandomOfInternal<T>(Location location)
+        private static bool AnyOfExceptInternal(Location location, HashSet<string> typeNames, GameObject except)
+        {
+            return location._objects
+                .Where(x => typeNames.Contains(x.TypeName) && !object.Equals(x, except))
+                .Any();
+        }
+
+        // For eating
+        public GameObject GetRandomOfExcept(HashSet<string> typeNames, GameObject except)
+        {
+            return ExecSafe(this, typeNames, except, GetRandomOfExceptInternal);
+        }
+
+        private static GameObject GetRandomOfExceptInternal(Location location, HashSet<string> typeNames, GameObject except)
+        {
+            var objects = location._objects
+                .Where(x => typeNames.Contains(x.TypeName) && !object.Equals(x, except))
+                .ToArray();
+
+            if (objects.Length == 0)
+            {
+                throw new InvalidOperationException($"There is no other game objects of types {string.Join(", ", typeNames)}");
+            }
+
+            var i = Random.Shared.Next(objects.Length);
+            return objects[i];
+        }
+
+        // For reproduction
+        public T GetRandomOfExcept<T>(T except)
+            where T : GameObject
+        {
+            return ExecSafe(this, except, GetRandomOfExceptInternal);
+        }
+
+        private static T GetRandomOfExceptInternal<T>(Location location, T except)
+            where T : GameObject
         {
             // TODO would be nice to not allocate new array on the heap
-            var objects = location._objects.OfType<T>().ToArray();
+            var objects = location._objects
+                .OfType<T>()
+                .Where(x => !object.Equals(x, except)) // reference equality
+                .ToArray();
+
+            if (objects.Length  == 0)
+            {
+                throw new InvalidOperationException($"There is no other game objects of type {typeof(T).Name}");
+            }
+
             var i = Random.Shared.Next(objects.Length);
             return objects[i];
         }
@@ -72,19 +117,27 @@ namespace MTSim.Map
             location._objects.Remove(node);
         }
 
-        private T ExecSafe<T>(Location location, Func<Location, T> func)
+        private void ExecSafe<T>(Location location, T arg, Action<Location, T> action)
         {
             lock (_sync)
             {
-                return func(location);
+                action(location, arg);
             }
         }
 
-        private void ExecSafe(Location location, GameObject gameObject, Action<Location, GameObject> action)
+        private TRes ExecSafe<TArg, TRes>(Location location, TArg arg, Func<Location, TArg, TRes> func)
         {
             lock (_sync)
             {
-                action(location, gameObject);
+                return func(location, arg);
+            }
+        }
+
+        private TRes ExecSafe<TArg1, TArg2, TRes>(Location location, TArg1 arg1, TArg2 arg2, Func<Location, TArg1, TArg2, TRes> func)
+        {
+            lock (_sync)
+            {
+                return func(location, arg1, arg2);
             }
         }
     }

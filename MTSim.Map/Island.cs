@@ -1,4 +1,5 @@
 ﻿using MTSim.Objects.Abstraction;
+using System.Collections.Generic;
 
 namespace MTSim.Map
 {
@@ -40,13 +41,13 @@ namespace MTSim.Map
             }
         }
 
-        public void Add(GameObject obj, in Point coords)
+        public void Add(GameObject obj, Point coords)
         {
             var location = Get(coords);
             location.Add(obj);
         }
 
-        public void Move(GameObject obj, in Point oldLocation, in Point newLocation)
+        public void Move(GameObject obj, Point oldLocation, Point newLocation)
         {
             var oldLoc = Get(oldLocation);
             oldLoc.Remove(obj);
@@ -55,14 +56,26 @@ namespace MTSim.Map
             newLoc.Add(obj);
         }
 
-        public T GetRandomOf<T>(in Point coords)
+        public bool AnyOfExcept(Point coords, HashSet<string> typeNames, GameObject except)
+        {
+            var location = Get(coords);
+            return location.AnyOfExcept(typeNames, except);
+        }
+
+        public GameObject GetRandomOfExcept(Point coords, HashSet<string> typeNames, GameObject except)
+        {
+            var location = Get(coords);
+            return location.GetRandomOfExcept(typeNames, except);
+        }
+
+        public T GetRandomOfExcept<T>(Point coords, T except)
             where T : GameObject
         {
             var location = Get(coords);
-            return location.GetRandomOf<T>();
+            return location.GetRandomOfExcept(except);
         }
 
-        private Location Get(in Point coords)
+        private Location Get(Point coords)
         {
             // To prevent deadlocks don't try to take one lock (Location._sync) from another (Island._sync)
             lock (_sync)

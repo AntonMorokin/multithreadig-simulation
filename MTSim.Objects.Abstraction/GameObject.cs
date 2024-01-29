@@ -4,6 +4,8 @@
     {
         public long Id { get; }
 
+        public string TypeName { get; }
+
         public abstract void Act();
     }
 }

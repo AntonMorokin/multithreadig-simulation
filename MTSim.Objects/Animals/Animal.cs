@@ -1,11 +1,14 @@
 ﻿using MTSim.Map;
 using MTSim.Objects.Abstraction;
 using System;
+using System.Collections.Generic;
 
 namespace MTSim.Objects.Animals
 {
     public abstract class Animal : GameObject
     {
+        protected const double MinSatiety = 0d;
+
         /// <summary>
         /// Максимальная скорость перемещения в клетках
         /// </summary>
@@ -17,6 +20,11 @@ namespace MTSim.Objects.Animals
         protected double MaxSatiety { get; }
 
         /// <summary>
+        /// Вектор пищи с вероятностью того, что она будет съедена
+        /// </summary>
+        protected Dictionary<string, double> WhatCanBeEaten { get; } = new();
+
+        /// <summary>
         /// Вес
         /// </summary>
         public double Weight { get; }
@@ -26,8 +34,19 @@ namespace MTSim.Objects.Animals
         /// </summary>
         public double CurrentSatiety { get; protected set; }
 
+        /// <summary>
+        /// Признак того, что животное мертво
+        /// </summary>
+        public virtual bool IsDead => CurrentSatiety <= MinSatiety;
+
+        /// <summary>
+        /// Остров, на котором находится животное
+        /// </summary>
         protected Island Island { get; }
 
+        /// <summary>
+        /// Координаты животного на острове
+        /// </summary>
         protected Point Coords { get; }
 
         public override void Act()
@@ -41,7 +60,7 @@ namespace MTSim.Objects.Animals
 
             if (Random.Shared.NextDouble() < 0.5d)
             {
-                Fuck();
+                Reproduce();
             }
             else
             {
@@ -49,10 +68,10 @@ namespace MTSim.Objects.Animals
             }
         }
 
-        protected abstract void Eat();
+        protected virtual void Eat() { }
 
-        protected abstract void Fuck();
+        protected virtual void Reproduce() { }
 
-        protected abstract void Move();
+        protected virtual void Move() { }
     }
 }

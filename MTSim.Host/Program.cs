@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MTSim.Configuration;
+using System;
 
 namespace MTSim.Host
 {
@@ -6,7 +7,7 @@ namespace MTSim.Host
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            var config = ConfigLoader.Load("D:\\repos\\Simulation\\MTSim\\gameConfig.json", "D:\\repos\\Simulation\\MTSim\\foodMatrix.csv");
         }
     }
 }

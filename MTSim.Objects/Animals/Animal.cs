@@ -22,7 +22,7 @@ namespace MTSim.Objects.Animals
         /// <summary>
         /// Вектор пищи с вероятностью того, что она будет съедена
         /// </summary>
-        protected Dictionary<string, double> WhatCanBeEaten { get; } = new();
+        protected Dictionary<string, double> WhatCanBeEaten { get; }
 
         /// <summary>
         /// Вес
@@ -49,7 +49,20 @@ namespace MTSim.Objects.Animals
         /// </summary>
         protected Point Coords { get; }
 
-        public override void Act()
+        protected Animal(int id, Island island, Point coords, int maxSpeed, double maxSatiety, double weight, Dictionary<string, double> food)
+            : base(id)
+        {
+            Island = island;
+            Coords = coords;
+            MaxSpeed = maxSpeed;
+            MaxSatiety = maxSatiety;
+            Weight = weight;
+            WhatCanBeEaten = food;
+
+            CurrentSatiety = MaxSatiety;
+        }
+
+        protected override void ActInternal()
         {
             if (CurrentSatiety < (MaxSatiety / 2d))
             {
@@ -68,7 +81,15 @@ namespace MTSim.Objects.Animals
             }
         }
 
-        protected virtual void Eat() { }
+        protected virtual void Eat()
+        {
+            const int MaxAttempts = 5;
+
+            for (var i = 0; i < MaxAttempts; i++)
+            {
+                // get victim
+            }
+        }
 
         protected virtual void Reproduce() { }
 

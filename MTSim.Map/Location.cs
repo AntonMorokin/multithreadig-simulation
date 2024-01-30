@@ -9,6 +9,7 @@ namespace MTSim.Map
     {
         private readonly LinkedList<GameObject> _objects = new();
         private readonly Dictionary<long, LinkedListNode<GameObject>> _objectsMap = new(64);
+        // TODO add config for game objects capacity
 
         private readonly object _sync = new();
 

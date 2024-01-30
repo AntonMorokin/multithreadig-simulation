@@ -5,8 +5,6 @@ VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MTSim.Host", "MTSim.Host\MTSim.Host.csproj", "{D941BFB8-C680-4C1E-AD3E-3E5157F55E37}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MTSim.Common", "MTSim.Common\MTSim.Common.csproj", "{6A3643E5-961F-4052-8BD9-EB62D8775B1D}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MTSim.Configuration", "MTSim.Configuration\MTSim.Configuration.csproj", "{CECE2625-EB32-4711-8BA2-3B2E2BF857C7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MTSim.Map", "MTSim.Map\MTSim.Map.csproj", "{6B6642FC-A313-4FF2-9962-BD160D1096FC}"
@@ -15,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MTSim.Objects", "MTSim.Obje
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MTSim.Utils", "MTSim.Utils\MTSim.Utils.csproj", "{9B542A07-61EE-4354-90EB-9E66F25B54B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTSim.Objects.Abstraction", "MTSim.Objects.Abstraction\MTSim.Objects.Abstraction.csproj", "{BA9128C8-9854-441C-B049-A69CEF162C02}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MTSim.Objects.Abstraction", "MTSim.Objects.Abstraction\MTSim.Objects.Abstraction.csproj", "{BA9128C8-9854-441C-B049-A69CEF162C02}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTSim.Factories", "MTSim.Factories\MTSim.Factories.csproj", "{81D0BA47-F72D-4F28-A6E8-6F61BB6D47AF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,10 +27,6 @@ Global
 		{D941BFB8-C680-4C1E-AD3E-3E5157F55E37}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D941BFB8-C680-4C1E-AD3E-3E5157F55E37}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D941BFB8-C680-4C1E-AD3E-3E5157F55E37}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6A3643E5-961F-4052-8BD9-EB62D8775B1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6A3643E5-961F-4052-8BD9-EB62D8775B1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6A3643E5-961F-4052-8BD9-EB62D8775B1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6A3643E5-961F-4052-8BD9-EB62D8775B1D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CECE2625-EB32-4711-8BA2-3B2E2BF857C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CECE2625-EB32-4711-8BA2-3B2E2BF857C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CECE2625-EB32-4711-8BA2-3B2E2BF857C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -51,6 +47,10 @@ Global
 		{BA9128C8-9854-441C-B049-A69CEF162C02}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA9128C8-9854-441C-B049-A69CEF162C02}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA9128C8-9854-441C-B049-A69CEF162C02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81D0BA47-F72D-4F28-A6E8-6F61BB6D47AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81D0BA47-F72D-4F28-A6E8-6F61BB6D47AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81D0BA47-F72D-4F28-A6E8-6F61BB6D47AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81D0BA47-F72D-4F28-A6E8-6F61BB6D47AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

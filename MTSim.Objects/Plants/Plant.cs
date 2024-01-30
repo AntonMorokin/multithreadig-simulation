@@ -8,8 +8,6 @@ namespace MTSim.Objects.Plants
     {
         protected const double MinWeight = 0.1d;
 
-        protected readonly object _sync = new();
-
         /// <summary>
         /// Скорость роста
         /// </summary>
@@ -30,7 +28,16 @@ namespace MTSim.Objects.Plants
         /// </summary>
         protected Point Coords { get; }
 
-        public override void Act()
+        protected Plant(int id, Island island, Point coords, double growSpeed, double weight)
+            : base(id)
+        {
+            Island = island;
+            Coords = coords;
+            GrowSpeed = growSpeed;
+            Weight = weight;
+        }
+
+        protected override void ActInternal()
         {
             Grow();
         }
@@ -38,21 +45,16 @@ namespace MTSim.Objects.Plants
         protected virtual void Grow()
         {
             var coef = Random.Shared.NextDouble() + 0.5d;
-            lock (_sync)
-            {
-                Weight += GrowSpeed * coef; // [+0.5*GrowSpeed...+1.5*GrowSpeed]
-            }
+            Weight += GrowSpeed * coef; // [+0.5*GrowSpeed...+1.5*GrowSpeed]
         }
 
         public virtual double BeEaten()
         {
-            // TODO it can be lock-free but needs to be correctly implemented
-            lock (_sync)
-            {
-                var eaten = Weight - MinWeight;
-                Weight = MinWeight;
-                return eaten;
-            }
+            // Assuming that it will be called only when captured
+            // TODO need to add API to call these methods only when captured
+            var eaten = Weight - MinWeight;
+            Weight = MinWeight;
+            return eaten;
         }
     }
 }

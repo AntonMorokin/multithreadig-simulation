@@ -1,7 +1,14 @@
 {
 	"island": {
 		"width": 30,
-		"height": 20
+		"height": 20,
+		"byTypeLocationCapacity": {
+			"Caterpillar": 20,
+			"Duck": 10,
+			"Fox": 3,
+			"Wolf": 3,
+			"Grass": 20,
+		}
 	},
 	"animals": {
 		"Caterpillar": {

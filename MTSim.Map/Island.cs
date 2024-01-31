@@ -18,25 +18,24 @@ namespace MTSim.Map
         /// </summary>
         public int Height { get; }
 
-        public Island(int width, int height)
+        public Island(int width, int height, Dictionary<string, int> byTypeLocationCapacity)
         {
             _map = new Location[height, width];
 
             Width = width;
             Height = height;
 
-            Init();
+            Init(byTypeLocationCapacity);
         }
 
-        private void Init()
+        private void Init(Dictionary<string, int> byTypeLocationCapacity)
         {
             for (var j = 0; j < Height; j++)
             {
                 for (var i = 0; i < Width; i++)
                 {
                     var coords = new Point(i, j);
-                    // TODO load capacity from config
-                    _map[j, i] = new Location(coords, 100);
+                    _map[j, i] = new Location(coords, byTypeLocationCapacity);
                 }
             }
         }

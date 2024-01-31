@@ -15,6 +15,8 @@ namespace MTSim.Configuration
             public int Width { get; set; }
 
             public int Height { get; set; }
+
+            public Dictionary<string, int> ByTypeLocationCapacity { get; set; } = new();
         }
 
         public sealed class AnimalConfig

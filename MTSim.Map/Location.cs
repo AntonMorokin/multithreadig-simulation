@@ -9,9 +9,9 @@ namespace MTSim.Map
     {
         private readonly LinkedList<GameObject> _objects = new();
         private readonly Dictionary<long, LinkedListNode<GameObject>> _objectsMap = new(64);
-        // TODO add config for game objects capacity
-
         private readonly object _sync = new();
+
+        private readonly Dictionary<string, int> _byTypeCapacity;
 
         /// <summary>
         /// Координаты на острове
@@ -23,16 +23,26 @@ namespace MTSim.Map
         /// </summary>
         public int ObjectsCount => _objects.Count;
 
-        /// <summary>
-        /// Вместимость локации
-        /// </summary>
-        // TODO add different constrains by different types
-        public int Capacity { get; }
-
-        public Location(Point coords, int capacity)
+        public Location(Point coords, Dictionary<string, int> byTypeCapacity)
         {
             Coords = coords;
-            Capacity = capacity;
+            _byTypeCapacity = byTypeCapacity;
+        }
+
+        public bool CanBeMovedTo(GameObject obj)
+        {
+            return ExecSafe(this, obj, CanBeMovedToInternal);
+        }
+
+        private static bool CanBeMovedToInternal(Location location, GameObject obj)
+        {
+            var typeCapacity = location._byTypeCapacity[obj.TypeName];
+            if (location._objects.Count(x => x.TypeName == obj.TypeName) < typeCapacity)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         // For moving

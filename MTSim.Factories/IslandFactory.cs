@@ -14,7 +14,7 @@ namespace MTSim.Factories
 
         public Island Create()
         {
-            var island = new Island(_islandConfig.Width, _islandConfig.Height);
+            var island = new Island(_islandConfig.Width, _islandConfig.Height, _islandConfig.ByTypeLocationCapacity);
             return island;
         }
     }

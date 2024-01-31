@@ -2,12 +2,15 @@
 using MTSim.Objects.Abstraction;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MTSim.Objects.Animals
 {
-    public abstract class Animal : GameObject
+    public abstract class Animal : GameObject, ICanBeEaten
     {
         protected const double MinSatiety = 0d;
+
+        protected readonly HashSet<string> _typesCanBeEaten;
 
         /// <summary>
         /// Максимальная скорость перемещения в клетках
@@ -35,6 +38,16 @@ namespace MTSim.Objects.Animals
         public double CurrentSatiety { get; protected set; }
 
         /// <summary>
+        /// Скорость потери насыщения
+        /// </summary>
+        protected double SatietyDecreaseSpeed { get; }
+
+        /// <summary>
+        /// Признак того, что животное голодно
+        /// </summary>
+        public bool IsHungry => 2 * CurrentSatiety < MaxSatiety; // Current is less than half of Max
+
+        /// <summary>
         /// Признак того, что животное мертво
         /// </summary>
         public virtual bool IsDead => CurrentSatiety <= MinSatiety;
@@ -42,12 +55,12 @@ namespace MTSim.Objects.Animals
         /// <summary>
         /// Остров, на котором находится животное
         /// </summary>
-        protected Island Island { get; }
+        public Island Island { get; }
 
         /// <summary>
         /// Координаты животного на острове
         /// </summary>
-        protected Point Coords { get; }
+        public Point Coords { get; protected set; }
 
         protected Animal(int id, Island island, Point coords, int maxSpeed, double maxSatiety, double weight, Dictionary<string, double> food)
             : base(id)
@@ -59,26 +72,48 @@ namespace MTSim.Objects.Animals
             Weight = weight;
             WhatCanBeEaten = food;
 
+            _typesCanBeEaten = food.Keys.ToHashSet();
             CurrentSatiety = MaxSatiety;
+            SatietyDecreaseSpeed = Weight / 10d;
         }
 
         protected override void ActInternal()
         {
-            if (CurrentSatiety < (MaxSatiety / 2d))
+            Live();
+            FinishAct();
+        }
+
+        private void Live()
+        {
+            if (IsHungry)
             {
-                // It's hungry
-                Eat();
+                if (Island.AnyOfExcept(Coords, _typesCanBeEaten, this))
+                {
+                    // It's hungry and here is something to eat
+                    Eat();
+                }
+                else
+                {
+                    // It's hungry and but here is nothing to eat. Leave location
+                    Move();
+                }
+
                 return;
             }
 
-            if (Random.Shared.NextDouble() < 0.5d)
+            var wantToReproduce = Random.Shared.NextDouble() < 0.5d;
+            if (wantToReproduce)
             {
-                Reproduce();
+                if (Island.AnyOfExcept(Coords, this))
+                {
+                    // It wants to reproduce and here is someone to do so with
+                    Reproduce();
+                    return;
+                }
             }
-            else
-            {
-                Move();
-            }
+
+            // It wants to reproduce but here is noone to do so with. Leave location
+            Move();
         }
 
         protected virtual void Eat()
@@ -87,12 +122,114 @@ namespace MTSim.Objects.Animals
 
             for (var i = 0; i < MaxAttempts; i++)
             {
-                // get victim
+                var victim = Island.GetRandomOfExcept(Coords, _typesCanBeEaten, this);
+
+                // trying to capture victim for MaxAttempts times
+                if (!SafeExecutor.TryUse(victim, out var victimExec))
+                {
+                    continue;
+                }
+
+                using (victimExec)
+                {
+                    if (victim is not ICanBeEaten knownVictim)
+                    {
+                        throw new InvalidOperationException($"Found victim of unknown type: {victim.GetType().FullName}");
+                    }
+
+                    var possibility = WhatCanBeEaten[victim.TypeName];
+                    var catched = Random.Shared.NextDouble() <= possibility;
+
+                    if (catched)
+                    {
+                        var eaten = knownVictim.BeEaten();
+                        var newSatiety = CurrentSatiety + eaten;
+                        CurrentSatiety = Math.Min(newSatiety, MaxSatiety);
+                    }
+                }
             }
         }
 
-        protected virtual void Reproduce() { }
+        protected virtual void Reproduce()
+        {
+            const int MaxAttempts = 5;
 
-        protected virtual void Move() { }
+            for (var i = 0; i < MaxAttempts; i++)
+            {
+                var partner = Island.GetRandomOfExcept(Coords, this);
+
+                if (!SafeExecutor.TryUse(partner, out var partnerExec))
+                {
+                    continue;
+                }
+
+                using (partnerExec)
+                {
+                    var newAnimals = BornNewAnimals(partner);
+                    foreach (var newAnimal in newAnimals)
+                    {
+                        Island.Add(newAnimal, Coords);
+                    }
+                }
+            }
+        }
+
+        protected abstract IReadOnlyCollection<Animal> BornNewAnimals(Animal partner);
+
+        protected virtual void Move()
+        {
+            const int MaxAttempts = 5;
+
+            if (MaxSpeed <= 0)
+            {
+                return;
+            }
+
+            for (var i = 0; i < MaxAttempts; i++)
+            {
+                var newCoords = CreateNextPoint();
+
+                if (Island.CanBeMovedTo(this, newCoords))
+                {
+                    Island.Move(this, Coords, newCoords);
+                    Coords = newCoords;
+                    return;
+                }
+            }
+
+        }
+
+        private Point CreateNextPoint()
+        {
+            var newXDiff = Random.Shared.Next(-MaxSpeed, MaxSpeed + 1); // [-MaxSpeed;+MaxSpeed]
+            var newYDiff = Random.Shared.Next(-MaxSpeed, MaxSpeed + 1);
+
+            var newX = RoundToInterval(0, Coords.X + newXDiff, Island.Width - 1);
+            var newY = RoundToInterval(0, Coords.Y + newYDiff, Island.Height - 1);
+
+            return new Point(newX, newY);
+        }
+
+        private int RoundToInterval(int min, int value, int max)
+        {
+            return Math.Max(min, Math.Min(max, value));
+        }
+
+        protected virtual void FinishAct()
+        {
+            var newSatiety = CurrentSatiety - SatietyDecreaseSpeed;
+            CurrentSatiety = Math.Max(MinSatiety, newSatiety);
+        }
+
+        public virtual double BeEaten()
+        {
+            ThrowIfNotCaptured();
+
+            // TODO maybe it's better to use dedicated flag
+            CurrentSatiety = 0d;
+
+            var coef = (Random.Shared.NextDouble() / 2) + 0.5d; //[0.25;0.75]
+            return Weight * coef;
+        }
     }
 }

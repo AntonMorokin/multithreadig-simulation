@@ -1,12 +1,13 @@
 ﻿using MTSim.Configuration;
 using MTSim.Map;
 using MTSim.Objects.Abstraction;
+using MTSim.Objects.Factories;
 using MTSim.Objects.Plants;
 using MTSim.Utils;
 
 namespace MTSim.Factories
 {
-    public sealed class PlantsFactory
+    public sealed class PlantsFactory : IPlantsFactory
     {
         private readonly Dictionary<string, GameConfig.PlantConfig> _plantsConfig;
         private readonly Island _island;
@@ -19,7 +20,7 @@ namespace MTSim.Factories
             _idGenerator = idGenerator;
         }
 
-        public GameObject CreateGrass(Point coords)
+        public Plant CreateGrass(Point coords)
         {
             var nextId = _idGenerator.GetNextId();
             var config = _plantsConfig[TypeNames.Grass];

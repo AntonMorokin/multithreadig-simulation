@@ -38,7 +38,7 @@ namespace MTSim.Configuration
                 predator.Food = predatorFood
                     .Skip(1)
                     .Zip(header)
-                    .ToDictionary(x => x.Second /*victim type name*/, x => double.Parse(x.First) /*possibility to catch victim*/);
+                    .ToDictionary(x => x.Second /*victim type name*/, x => double.Parse(x.First) / 100d /*possibility to catch victim*/);
             }
         }
     }

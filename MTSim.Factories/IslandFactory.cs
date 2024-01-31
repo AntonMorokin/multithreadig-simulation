@@ -1,9 +1,10 @@
 ﻿using MTSim.Map;
+using MTSim.Map.Factories;
 using static MTSim.Configuration.GameConfig;
 
 namespace MTSim.Factories
 {
-    public sealed class IslandFactory
+    public sealed class IslandFactory : IIslandFactory
     {
         private readonly IslandConfig _islandConfig;
 

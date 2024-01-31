@@ -45,7 +45,6 @@ namespace MTSim.Map
             return false;
         }
 
-        // For moving
         public bool AnyOfExcept(HashSet<string> typeNames, GameObject except)
         {
             return ExecSafe(this, typeNames, except, AnyOfExceptInternal);
@@ -58,7 +57,21 @@ namespace MTSim.Map
                 .Any();
         }
 
-        // For eating
+        public bool AnyOfExcept<T>(T except)
+            where T : GameObject
+        {
+            return ExecSafe(this, except, AnyOfExceptInternal);
+        }
+
+        private static bool AnyOfExceptInternal<T>(Location location, T except)
+            where T : GameObject
+        {
+            return location._objects
+                .OfType<T>()
+                .Where(x => !object.Equals(x, except))
+                .Any();
+        }
+
         public GameObject GetRandomOfExcept(HashSet<string> typeNames, GameObject except)
         {
             return ExecSafe(this, typeNames, except, GetRandomOfExceptInternal);
@@ -79,7 +92,6 @@ namespace MTSim.Map
             return objects[i];
         }
 
-        // For reproduction
         public T GetRandomOfExcept<T>(T except)
             where T : GameObject
         {
@@ -95,7 +107,7 @@ namespace MTSim.Map
                 .Where(x => !object.Equals(x, except)) // reference equality
                 .ToArray();
 
-            if (objects.Length  == 0)
+            if (objects.Length == 0)
             {
                 throw new InvalidOperationException($"There is no other game objects of type {typeof(T).Name}");
             }

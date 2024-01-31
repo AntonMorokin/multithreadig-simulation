@@ -22,19 +22,14 @@
 
         public void Act()
         {
-            if (!TryToCapture())
+            if (!SafeExecutor.TryUse(this, out var exec))
             {
-                // already captured by another object
                 return;
             }
 
-            try
+            using (exec)
             {
                 ActInternal();
-            }
-            finally
-            {
-                SetFree();
             }
         }
 
@@ -46,6 +41,14 @@
         public void SetFree()
         {
             Interlocked.Exchange(ref _isInAction, IsFree);
+        }
+
+        protected void ThrowIfNotCaptured()
+        {
+            if (!IsCaptured)
+            {
+                throw new InvalidOperationException("Game object has to be captured before using it");
+            }
         }
     }
 }

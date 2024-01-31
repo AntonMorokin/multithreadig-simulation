@@ -4,7 +4,7 @@ using System;
 
 namespace MTSim.Objects.Plants
 {
-    public abstract class Plant : GameObject
+    public abstract class Plant : GameObject, ICanBeEaten
     {
         protected const double MinWeight = 0.1d;
 
@@ -50,8 +50,9 @@ namespace MTSim.Objects.Plants
 
         public virtual double BeEaten()
         {
-            // Assuming that it will be called only when captured
-            // TODO need to add API to call these methods only when captured
+            // Assuming that it will be called only when captured. But check it anyway
+            ThrowIfNotCaptured();
+
             var eaten = Weight - MinWeight;
             Weight = MinWeight;
             return eaten;

@@ -1,5 +1,4 @@
 ﻿using MTSim.Configuration;
-using System;
 
 namespace MTSim.Host
 {

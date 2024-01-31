@@ -1,13 +1,15 @@
 ﻿using MTSim.Configuration;
 using MTSim.Map;
 using MTSim.Objects.Abstraction;
+using MTSim.Objects.Animals;
 using MTSim.Objects.Animals.Herbivores;
 using MTSim.Objects.Animals.Predators;
+using MTSim.Objects.Factories;
 using MTSim.Utils;
 
 namespace MTSim.Factories
 {
-    public sealed class AnimalsFactory
+    public sealed class AnimalsFactory : IAnimalsFactory
     {
         private readonly Dictionary<string, GameConfig.AnimalConfig> _animalsConfig;
         private readonly Island _island;
@@ -20,36 +22,36 @@ namespace MTSim.Factories
             _idGenerator = idGenerator;
         }
 
-        public GameObject CreateWolf(Point coords)
+        public Animal CreateWolf(Point coords)
         {
             var nextId = _idGenerator.GetNextId();
             var config = _animalsConfig[TypeNames.Wolf];
 
-            return new Wolf(nextId, _island, coords, config.MaxSpeed, config.MaxSatiety, config.Weight, config.Food);
+            return new Wolf(nextId, _island, coords, config.MaxSpeed, config.MaxSatiety, config.Weight, config.Food, this);
         }
 
-        public GameObject CreateFox(Point coords)
+        public Animal CreateFox(Point coords)
         {
             var nextId = _idGenerator.GetNextId();
             var config = _animalsConfig[TypeNames.Fox];
 
-            return new Fox(nextId, _island, coords, config.MaxSpeed, config.MaxSatiety, config.Weight, config.Food);
+            return new Fox(nextId, _island, coords, config.MaxSpeed, config.MaxSatiety, config.Weight, config.Food, this);
         }
 
-        public GameObject CreateDuck(Point coords)
+        public Animal CreateDuck(Point coords)
         {
             var nextId = _idGenerator.GetNextId();
             var config = _animalsConfig[TypeNames.Duck];
 
-            return new Duck(nextId, _island, coords, config.MaxSpeed, config.MaxSatiety, config.Weight, config.Food);
+            return new Duck(nextId, _island, coords, config.MaxSpeed, config.MaxSatiety, config.Weight, config.Food, this);
         }
 
-        public GameObject CreateCaterpillar(Point coords)
+        public Animal CreateCaterpillar(Point coords)
         {
             var nextId = _idGenerator.GetNextId();
             var config = _animalsConfig[TypeNames.Caterpillar];
 
-            return new Caterpillar(nextId, _island, coords, config.MaxSpeed, config.MaxSatiety, config.Weight, config.Food);
+            return new Caterpillar(nextId, _island, coords, config.MaxSpeed, config.MaxSatiety, config.Weight, config.Food, this);
         }
     }
 }

@@ -22,7 +22,7 @@
 
         public void Act()
         {
-            if (!SafeExecutor.TryUse(this, out var exec))
+            if (!SafeExecutor.TryToCapture(this, out var exec))
             {
                 return;
             }

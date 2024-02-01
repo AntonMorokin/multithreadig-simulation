@@ -28,8 +28,6 @@ namespace MTSim.Configuration
             public double MaxSatiety { get; set; }
 
             public Dictionary<string, double> Food { get; set; } = new();
-
-            public int MaxCountOnLocation { get; set; }
         }
 
         public sealed class PlantConfig

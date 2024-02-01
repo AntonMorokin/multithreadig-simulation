@@ -14,26 +14,22 @@
 		"Caterpillar": {
 			"weight": 0.01,
 			"maxSpeed": 0,
-			"maxSatiety": 0.01,
-			"maxCountOnLocation": 20
+			"maxSatiety": 0.01
 		},
 		"Duck": {
 			"weight": 3.0,
 			"maxSpeed": 4,
-			"maxSatiety": 0.15,
-			"maxCountOnLocation": 10
+			"maxSatiety": 0.15
 		},
 		"Fox": {
 			"weight": 8.0,
 			"maxSpeed": 2,
-			"maxSatiety": 3.0,
-			"maxCountOnLocation": 3
+			"maxSatiety": 3.0
 		},
 		"Wolf": {
 			"weight": 50.0,
 			"maxSpeed": 3,
-			"maxSatiety": 8.0,
-			"maxCountOnLocation": 3
+			"maxSatiety": 8.0
 		}
 	},
 	"plants": {

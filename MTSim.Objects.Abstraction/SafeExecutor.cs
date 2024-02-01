@@ -1,23 +1,39 @@
 ﻿namespace MTSim.Objects.Abstraction
 {
-    public readonly ref struct SafeExecutor
+    public ref struct SafeExecutor
     {
         private readonly GameObject _obj;
+        private bool _captured;
 
         private SafeExecutor(GameObject obj)
         {
             _obj = obj;
         }
 
-        public static bool TryUse(GameObject obj, out SafeExecutor executor)
+        public static bool TryToCapture(GameObject obj, out SafeExecutor executor)
         {
+            const int MaxAttempts = 5;
+
             executor = new SafeExecutor(obj);
-            return executor._obj.TryToCapture();
+            var sw = new SpinWait();
+
+            executor._captured = executor._obj.TryToCapture();
+
+            for (int i = 1; i < MaxAttempts || !executor._captured; i++)
+            {
+                sw.SpinOnce();
+                executor._captured = executor._obj.TryToCapture();
+            }
+
+            return executor._captured;
         }
 
         public void Dispose()
         {
-            _obj.SetFree();
+            if (_captured)
+            {
+                _obj.SetFree();
+            }
         }
     }
 }

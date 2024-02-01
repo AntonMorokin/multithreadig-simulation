@@ -118,14 +118,14 @@ namespace MTSim.Objects.Animals
 
         protected virtual void Eat()
         {
-            const int MaxAttempts = 5;
+            const int MaxAttempts = 3;
 
             for (var i = 0; i < MaxAttempts; i++)
             {
                 var victim = Island.GetRandomOfExcept(Coords, _typesCanBeEaten, this);
 
-                // trying to capture victim for MaxAttempts times
-                if (!SafeExecutor.TryUse(victim, out var victimExec))
+                // trying to capture victim
+                if (!SafeExecutor.TryToCapture(victim, out var victimExec))
                 {
                     continue;
                 }
@@ -152,13 +152,13 @@ namespace MTSim.Objects.Animals
 
         protected virtual void Reproduce()
         {
-            const int MaxAttempts = 5;
+            const int MaxAttempts = 3;
 
             for (var i = 0; i < MaxAttempts; i++)
             {
                 var partner = Island.GetRandomOfExcept(Coords, this);
 
-                if (!SafeExecutor.TryUse(partner, out var partnerExec))
+                if (!SafeExecutor.TryToCapture(partner, out var partnerExec))
                 {
                     continue;
                 }
@@ -178,7 +178,7 @@ namespace MTSim.Objects.Animals
 
         protected virtual void Move()
         {
-            const int MaxAttempts = 5;
+            const int MaxAttempts = 3;
 
             if (MaxSpeed <= 0)
             {

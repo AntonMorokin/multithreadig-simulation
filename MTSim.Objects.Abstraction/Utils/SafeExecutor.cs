@@ -1,7 +1,11 @@
-﻿namespace MTSim.Objects.Abstraction
+﻿using System.Diagnostics;
+
+namespace MTSim.Objects.Abstraction.Utils
 {
     public ref struct SafeExecutor
     {
+        private static TimeSpan Timeout = TimeSpan.FromMicroseconds(1_000); // 1ms
+
         private readonly GameObject _obj;
         private bool _captured;
 
@@ -12,20 +16,26 @@
 
         public static bool TryToCapture(GameObject obj, out SafeExecutor executor)
         {
-            const int MaxAttempts = 5;
-
             executor = new SafeExecutor(obj);
             var sw = new SpinWait();
 
+            var started = Stopwatch.GetTimestamp();
+
             executor._captured = executor._obj.TryToCapture();
 
-            for (int i = 1; i < MaxAttempts || !executor._captured; i++)
+            while (!TimeIsOver(started, Stopwatch.GetTimestamp()))
             {
                 sw.SpinOnce();
                 executor._captured = executor._obj.TryToCapture();
             }
 
             return executor._captured;
+        }
+
+        private static bool TimeIsOver(long started, long ended)
+        {
+            var elapsedSeconds = (double)(ended - started) / Stopwatch.Frequency;
+            return elapsedSeconds > Timeout.TotalSeconds;
         }
 
         public void Dispose()

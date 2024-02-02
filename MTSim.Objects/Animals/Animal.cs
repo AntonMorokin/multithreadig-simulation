@@ -1,12 +1,14 @@
 ﻿using MTSim.Map;
 using MTSim.Objects.Abstraction;
+using MTSim.Objects.Abstraction.Interfaces;
+using MTSim.Objects.Abstraction.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace MTSim.Objects.Animals
 {
-    public abstract class Animal : GameObject, ICanBeEaten
+    public abstract class Animal : GameObject, ICanBeEaten, IPositioned, IAlive
     {
         protected const double MinSatiety = 0d;
 
@@ -132,6 +134,11 @@ namespace MTSim.Objects.Animals
 
                 using (victimExec)
                 {
+                    if (!CanBeProcessed(victim))
+                    {
+                        continue;
+                    }
+
                     if (victim is not ICanBeEaten knownVictim)
                     {
                         throw new InvalidOperationException($"Found victim of unknown type: {victim.GetType().FullName}");
@@ -150,6 +157,25 @@ namespace MTSim.Objects.Animals
             }
         }
 
+        private bool CanBeProcessed(GameObject obj)
+        {
+            if (obj is IPositioned positioned
+                        && positioned.Coords != Coords)
+            {
+                // Ran away before we captured it
+                return false;
+            }
+
+            if (obj is IAlive alive
+                && alive.IsDead)
+            {
+                // Already dead
+                return false;
+            }
+
+            return true;
+        }
+
         protected virtual void Reproduce()
         {
             const int MaxAttempts = 3;
@@ -165,6 +191,11 @@ namespace MTSim.Objects.Animals
 
                 using (partnerExec)
                 {
+                    if (!CanBeProcessed(partner))
+                    {
+                        continue;
+                    }
+
                     var newAnimals = BornNewAnimals(partner);
                     foreach (var newAnimal in newAnimals)
                     {

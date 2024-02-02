@@ -11,6 +11,7 @@ namespace MTSim.Game
             var config = ConfigLoader.Load(configFilePath, foodMatrixFilePath);
 
             var islandFactory = new IslandFactory(config.Island);
+            // TODO dispose island properly
             var island = islandFactory.Create();
 
             var idGenerator = new IdGenerator();

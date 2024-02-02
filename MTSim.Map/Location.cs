@@ -1,17 +1,22 @@
 ﻿using MTSim.Objects.Abstraction;
+using MTSim.Objects.Abstraction.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace MTSim.Map
 {
-    internal sealed class Location
+    internal sealed class Location : IDisposable
     {
         private readonly LinkedList<GameObject> _objects = new();
         private readonly Dictionary<long, LinkedListNode<GameObject>> _objectsMap = new(64);
-        private readonly object _sync = new();
+
+        private readonly ReaderWriterLockSlim _sync = new();
 
         private readonly Dictionary<string, int> _byTypeCapacity;
+
+        private bool _disposed;
 
         /// <summary>
         /// Координаты на острове
@@ -29,9 +34,19 @@ namespace MTSim.Map
             _byTypeCapacity = byTypeCapacity;
         }
 
+        private void CheckIfDisposed()
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(Island));
+            }
+        }
+
         public bool CanBeMovedTo(GameObject obj)
         {
-            return ExecSafe(this, obj, CanBeMovedToInternal);
+            CheckIfDisposed();
+
+            return ExecSafeReading(this, obj, CanBeMovedToInternal);
         }
 
         private static bool CanBeMovedToInternal(Location location, GameObject obj)
@@ -47,7 +62,9 @@ namespace MTSim.Map
 
         public bool AnyOfExcept(HashSet<string> typeNames, GameObject except)
         {
-            return ExecSafe(this, typeNames, except, AnyOfExceptInternal);
+            CheckIfDisposed();
+
+            return ExecSafeReading(this, typeNames, except, AnyOfExceptInternal);
         }
 
         private static bool AnyOfExceptInternal(Location location, HashSet<string> typeNames, GameObject except)
@@ -60,7 +77,9 @@ namespace MTSim.Map
         public bool AnyOfExcept<T>(T except)
             where T : GameObject
         {
-            return ExecSafe(this, except, AnyOfExceptInternal);
+            CheckIfDisposed();
+
+            return ExecSafeReading(this, except, AnyOfExceptInternal);
         }
 
         private static bool AnyOfExceptInternal<T>(Location location, T except)
@@ -74,7 +93,9 @@ namespace MTSim.Map
 
         public GameObject GetRandomOfExcept(HashSet<string> typeNames, GameObject except)
         {
-            return ExecSafe(this, typeNames, except, GetRandomOfExceptInternal);
+            CheckIfDisposed();
+
+            return ExecSafeReading(this, typeNames, except, GetRandomOfExceptInternal);
         }
 
         private static GameObject GetRandomOfExceptInternal(Location location, HashSet<string> typeNames, GameObject except)
@@ -95,7 +116,9 @@ namespace MTSim.Map
         public T GetRandomOfExcept<T>(T except)
             where T : GameObject
         {
-            return ExecSafe(this, except, GetRandomOfExceptInternal);
+            CheckIfDisposed();
+
+            return ExecSafeReading(this, except, GetRandomOfExceptInternal);
         }
 
         private static T GetRandomOfExceptInternal<T>(Location location, T except)
@@ -118,7 +141,9 @@ namespace MTSim.Map
 
         public void Add(GameObject obj)
         {
-            ExecSafe(this, obj, AddInternal);
+            CheckIfDisposed();
+
+            ExecSafeWriting(this, obj, AddInternal);
         }
 
         private static void AddInternal(Location location, GameObject obj)
@@ -129,7 +154,9 @@ namespace MTSim.Map
 
         public void Remove(GameObject obj)
         {
-            ExecSafe(this, obj, RemoveInternal);
+            CheckIfDisposed();
+
+            ExecSafeWriting(this, obj, RemoveInternal);
         }
 
         private static void RemoveInternal(Location location, GameObject obj)
@@ -140,28 +167,81 @@ namespace MTSim.Map
             location._objects.Remove(node);
         }
 
-        private void ExecSafe<T>(Location location, T arg, Action<Location, T> action)
+        public void RemoveDeadObjects()
         {
-            lock (_sync)
+            CheckIfDisposed();
+
+            ExecSafeWriting(this, RemoveDeadObjectsInternal);
+        }
+
+        private static void RemoveDeadObjectsInternal(Location location)
+        {
+            var dead = location._objects
+                .Where(x => x is IAlive alive && alive.IsDead)
+                .ToArray();
+
+            foreach (var obj in dead)
             {
-                action(location, arg);
+                RemoveInternal(location, obj);
             }
         }
 
-        private TRes ExecSafe<TArg, TRes>(Location location, TArg arg, Func<Location, TArg, TRes> func)
+        private TRes ExecSafeReading<TArg, TRes>(Location location, TArg arg, Func<Location, TArg, TRes> func)
         {
-            lock (_sync)
+            _sync.EnterReadLock();
+            try
             {
                 return func(location, arg);
             }
+            finally
+            {
+                _sync.ExitReadLock();
+            }
         }
 
-        private TRes ExecSafe<TArg1, TArg2, TRes>(Location location, TArg1 arg1, TArg2 arg2, Func<Location, TArg1, TArg2, TRes> func)
+        private TRes ExecSafeReading<TArg1, TArg2, TRes>(Location location, TArg1 arg1, TArg2 arg2, Func<Location, TArg1, TArg2, TRes> func)
         {
-            lock (_sync)
+            _sync.EnterReadLock();
+            try
             {
                 return func(location, arg1, arg2);
             }
+            finally
+            {
+                _sync.ExitReadLock();
+            }
+        }
+
+        private void ExecSafeWriting(Location location, Action<Location> action)
+        {
+            _sync.EnterWriteLock();
+            try
+            {
+                action(location);
+            }
+            finally
+            {
+                _sync.ExitWriteLock();
+            }
+        }
+
+        private void ExecSafeWriting<T>(Location location, T arg, Action<Location, T> action)
+        {
+            _sync.EnterWriteLock();
+            try
+            {
+                action(location, arg);
+            }
+            finally
+            {
+                _sync.ExitWriteLock();
+            }
+        }
+
+        public void Dispose()
+        {
+            _disposed = true;
+            _sync.Dispose();
         }
     }
 }

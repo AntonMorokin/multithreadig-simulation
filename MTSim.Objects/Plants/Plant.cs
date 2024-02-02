@@ -1,10 +1,11 @@
 ﻿using MTSim.Map;
 using MTSim.Objects.Abstraction;
+using MTSim.Objects.Abstraction.Interfaces;
 using System;
 
 namespace MTSim.Objects.Plants
 {
-    public abstract class Plant : GameObject, ICanBeEaten
+    public abstract class Plant : GameObject, ICanBeEaten, IPositioned, IAlive
     {
         protected const double MinWeight = 0.1d;
 
@@ -21,12 +22,17 @@ namespace MTSim.Objects.Plants
         /// <summary>
         /// Остров, на котором находится животное
         /// </summary>
-        protected Island Island { get; }
+        public Island Island { get; }
 
         /// <summary>
         /// Координаты животного на острове
         /// </summary>
-        protected Point Coords { get; }
+        public Point Coords { get; }
+
+        /// <summary>
+        /// Признак того, что растение мертво
+        /// </summary>
+        public bool IsDead => false; // cannot die
 
         protected Plant(int id, Island island, Point coords, double growSpeed, double weight)
             : base(id)

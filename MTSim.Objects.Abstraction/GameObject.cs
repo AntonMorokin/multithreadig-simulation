@@ -1,4 +1,6 @@
-﻿namespace MTSim.Objects.Abstraction
+﻿using MTSim.Objects.Abstraction.Utils;
+
+namespace MTSim.Objects.Abstraction
 {
     public abstract class GameObject
     {

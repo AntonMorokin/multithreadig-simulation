@@ -1,4 +1,4 @@
-﻿namespace MTSim.Objects
+﻿namespace MTSim.Objects.Abstraction.Interfaces
 {
     public interface ICanBeEaten
     {

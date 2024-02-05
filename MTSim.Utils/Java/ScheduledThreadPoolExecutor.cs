@@ -10,7 +10,7 @@ namespace MTSim.Utils.Java
     /// </summary>
     public sealed class ScheduledThreadPoolExecutor
     {
-        public Task Schedule(Action action, TimeSpan delay)
+        public static Task Schedule(Action action, TimeSpan delay)
         {
             return Task.Delay(delay).ContinueWith(_ =>
             {
@@ -18,7 +18,7 @@ namespace MTSim.Utils.Java
             });
         }
 
-        public Task<T> Schedule<T>(Func<T> callable, TimeSpan delay)
+        public static Task<T> Schedule<T>(Func<T> callable, TimeSpan delay)
         {
             return Task.Delay(delay).ContinueWith(_ =>
             {
@@ -26,7 +26,7 @@ namespace MTSim.Utils.Java
             });
         }
 
-        public Task ScheduleAtFixedRate(Func<CancellationToken, Task> runnable, TimeSpan initialDelay, TimeSpan period, CancellationToken cancellationToken)
+        public static Task ScheduleAtFixedRate(Func<CancellationToken, Task> runnable, TimeSpan initialDelay, TimeSpan period, CancellationToken cancellationToken)
         {
             // don't like two awaits
             return Task.Run(async () =>
@@ -36,18 +36,29 @@ namespace MTSim.Utils.Java
             }, cancellationToken);
         }
 
-        private async Task ExecutionLoop(Func<CancellationToken, Task> runnable, TimeSpan period, CancellationToken cancellationToken)
+        private static async Task ExecutionLoop(Func<CancellationToken, Task> runnable, TimeSpan period, CancellationToken cancellationToken)
         {
-            var sw = new Stopwatch();
+            var periodSeconds = period.TotalSeconds;
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                sw.Restart();
+                var started = Stopwatch.GetTimestamp();
 
                 await runnable(cancellationToken);
 
-                sw.Stop();
-                await Task.Delay(period - sw.Elapsed);
+                await WaitAsync(started, Stopwatch.GetTimestamp(), periodSeconds, cancellationToken);
+            }
+        }
+
+        private static async ValueTask WaitAsync(long started, long finished, double periodSeconds, CancellationToken cancellationToken)
+        {
+            var elapsedTicks = (double)(finished - started);
+            var elapsedSeconds = elapsedTicks / Stopwatch.Frequency;
+            var needToWait = periodSeconds - elapsedSeconds;
+
+            if (needToWait > 0)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(needToWait), cancellationToken);
             }
         }
     }

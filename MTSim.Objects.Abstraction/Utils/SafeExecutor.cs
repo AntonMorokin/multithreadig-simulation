@@ -4,7 +4,8 @@ namespace MTSim.Objects.Abstraction.Utils
 {
     public ref struct SafeExecutor
     {
-        private static TimeSpan Timeout = TimeSpan.FromMicroseconds(1_000); // 1ms
+        private static TimeSpan Timeout = TimeSpan.FromMicroseconds(100); // 100mks
+        private static double TimeoutSeconds = Timeout.TotalSeconds;
 
         private readonly GameObject _obj;
         private bool _captured;
@@ -32,10 +33,10 @@ namespace MTSim.Objects.Abstraction.Utils
             return executor._captured;
         }
 
-        private static bool TimeIsOver(long started, long ended)
+        private static bool TimeIsOver(long started, long finished)
         {
-            var elapsedSeconds = (double)(ended - started) / Stopwatch.Frequency;
-            return elapsedSeconds > Timeout.TotalSeconds;
+            var elapsedSeconds = (double)(finished - started) / Stopwatch.Frequency;
+            return elapsedSeconds > TimeoutSeconds;
         }
 
         public void Dispose()

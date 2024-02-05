@@ -1,6 +1,7 @@
 ﻿using MTSim.Objects.Abstraction;
 using MTSim.Objects.Abstraction.Interfaces;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -242,6 +243,24 @@ namespace MTSim.Map
         {
             _disposed = true;
             _sync.Dispose();
+        }
+
+        public IEnumerable<GameObject> GetObjects()
+        {
+            CheckIfDisposed();
+
+            _sync.EnterReadLock();
+            try
+            {
+                foreach (var obj in _objects)
+                {
+                    yield return obj;
+                }
+            }
+            finally
+            {
+                _sync.ExitReadLock();
+            }
         }
     }
 }

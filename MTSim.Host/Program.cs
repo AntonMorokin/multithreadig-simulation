@@ -9,28 +9,17 @@ namespace MTSim.Host
     {
         static async Task Main(string[] args)
         {
-            await await Task.Delay(1000)
-                .ContinueWith(async _ =>
-                {
-                    Console.WriteLine("First");
-                    await Task.Delay(2000);
-                    Console.WriteLine("Second");
-                });
+            var cts = new CancellationTokenSource();
 
-            Console.WriteLine("Third");
-            Console.ReadLine();
+            Console.CancelKeyPress += (sender, e) =>
+            {
+                cts.Cancel();
+                e.Cancel = true;
+            };
 
-            //var cts = new CancellationTokenSource();
-
-            //Console.CancelKeyPress += (sender, e) =>
-            //{
-            //    cts.Cancel();
-            //    e.Cancel = true;
-            //};
-
-            //await GameBuilder
-            //    .InitGame("D:\\repos\\Simulation\\MTSim\\gameConfig.json", "D:\\repos\\Simulation\\MTSim\\foodMatrix.csv")
-            //    .RunAsync(cts.Token);
+            using var disposable = await GameBuilder
+                .InitGame("D:\\repos\\Simulation\\MTSim\\gameConfig.json", "D:\\repos\\Simulation\\MTSim\\foodMatrix.csv")
+                .RunAsync(cts.Token);
         }
     }
 }

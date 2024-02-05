@@ -33,6 +33,16 @@ namespace MTSim.Objects.Abstraction
             {
                 ActInternal();
             }
+
+            //try
+            //{
+            //    _isInAction = IsInAction;
+            //    ActInternal();
+            //}
+            //finally
+            //{
+            //    _isInAction = IsFree;
+            //}
         }
 
         public bool TryToCapture()

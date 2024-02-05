@@ -1,4 +1,5 @@
 ﻿using MTSim.Map;
+using MTSim.Map.Interfaces;
 using MTSim.Objects.Abstraction;
 using MTSim.Objects.Abstraction.Interfaces;
 using MTSim.Objects.Abstraction.Utils;

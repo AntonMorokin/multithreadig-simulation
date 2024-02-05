@@ -1,5 +1,6 @@
 ﻿using MTSim.Configuration;
 using MTSim.Factories;
+using MTSim.Game.Interfaces;
 using MTSim.Utils;
 
 namespace MTSim.Game

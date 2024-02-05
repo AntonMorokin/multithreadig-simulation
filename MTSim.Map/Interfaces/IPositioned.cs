@@ -1,6 +1,4 @@
-﻿using MTSim.Map;
-
-namespace MTSim.Objects.Abstraction.Interfaces
+﻿namespace MTSim.Map.Interfaces
 {
     public interface IPositioned
     {

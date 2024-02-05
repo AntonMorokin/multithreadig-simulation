@@ -1,6 +1,7 @@
 ﻿using MTSim.Objects.Abstraction;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MTSim.Map
 {
@@ -32,7 +33,7 @@ namespace MTSim.Map
 
         private void Init(Dictionary<string, int> byTypeLocationCapacity)
         {
-            ForEachLocation(static (map, j, i, arg) =>
+            ForEachLocation(static (map, i, j, arg) =>
             {
                 var coords = new Point(i, j);
                 map[j, i] = new Location(coords, arg);
@@ -40,13 +41,13 @@ namespace MTSim.Map
         }
 
         // TODO would be nice to create own enumerator based on ref struct
-        private void ForEachLocation(Action<Location[,], int, int> action)
+        private void ForEachLocation(Action<Location> action)
         {
             for (var j = 0; j < Height; j++)
             {
                 for (var i = 0; i < Width; i++)
                 {
-                    action(_map, i, j);
+                    action(_map[j, i]);
                 }
             }
         }
@@ -135,7 +136,7 @@ namespace MTSim.Map
         {
             CheckIfDisposed();
 
-            ForEachLocation(static (map, j, i) => map[j, i].RemoveDeadObjects());
+            ForEachLocation(static (location) => location.RemoveDeadObjects());
         }
 
         private Location Get(Point from)
@@ -147,7 +148,25 @@ namespace MTSim.Map
         {
             _disposed = true;
 
-            ForEachLocation(static (map, j, i) => map[j, i].Dispose());
+            ForEachLocation(static (location) => location.Dispose());
+        }
+
+        private IEnumerable<Location> GetLocations()
+        {
+            for (var j = 0; j < Height; j++)
+            {
+                for (var i = 0; i < Width; i++)
+                {
+                    yield return _map[j, i];
+                }
+            }
+        }
+
+        public IEnumerable<GameObject> GetObjects()
+        {
+            CheckIfDisposed();
+
+            return GetLocations().SelectMany(location => location.GetObjects());
         }
     }
 }

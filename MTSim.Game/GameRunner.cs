@@ -23,8 +23,6 @@ namespace MTSim.Game
                 var statsTask = ScheduledThreadPoolExecutor.ScheduleAtFixedRate(CollectStatsAsync, CycleDuration / 2, CycleDuration, cancellationToken);
 
                 await Task.WhenAll(simulationTask, statsTask);
-
-                //await ScheduledThreadPoolExecutor.ScheduleAtFixedRate(MakeSimulationCycleAsync, TimeSpan.Zero, CycleDuration, cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -36,10 +34,10 @@ namespace MTSim.Game
         private async Task MakeSimulationCycleAsync(CancellationToken cancellationToken)
         {
 #if DEBUG
-            System.Console.WriteLine($"{DateTime.Now:O}: New cycle!");
+            Console.WriteLine($"{DateTime.Now:O}: New cycle! Objects count: {_island.GetObjects().Count()}");
 #endif
 
-            await ThreadPoolExecutor.InvokeAll(_island.GetObjects().Select(x => (Action)x.Act), cancellationToken);
+            await ThreadPoolExecutor.InvokeAll(_island.GetObjects(), static x => x.Act(), cancellationToken);
 
             _island.RemoveDeadObjects();
         }

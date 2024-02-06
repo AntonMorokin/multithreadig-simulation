@@ -125,7 +125,11 @@ namespace MTSim.Objects.Animals
 
             for (var i = 0; i < MaxAttempts; i++)
             {
-                var victim = Island.GetRandomOfExcept(Coords, _typesCanBeEaten, this);
+                GameObject victim;
+                if (!Island.TryGetRandomOfExcept(Coords, _typesCanBeEaten, this, out victim!))
+                {
+                    continue;
+                }
 
                 // trying to capture victim
                 if (!SafeExecutor.TryToCapture(victim, out var victimExec))
@@ -135,7 +139,7 @@ namespace MTSim.Objects.Animals
 
                 using (victimExec)
                 {
-                    if (!CanBeProcessed(victim))
+                    if (!CanWorkWith(victim))
                     {
                         continue;
                     }
@@ -158,10 +162,10 @@ namespace MTSim.Objects.Animals
             }
         }
 
-        private bool CanBeProcessed(GameObject obj)
+        private bool CanWorkWith(GameObject obj)
         {
             if (obj is IPositioned positioned
-                        && positioned.Coords != Coords)
+                && positioned.Coords != Coords)
             {
                 // Ran away before we captured it
                 return false;
@@ -183,7 +187,11 @@ namespace MTSim.Objects.Animals
 
             for (var i = 0; i < MaxAttempts; i++)
             {
-                var partner = Island.GetRandomOfExcept(Coords, this);
+                Animal partner;
+                if (!Island.TryGetRandomOfExcept(Coords, this, out partner!))
+                {
+                    continue;
+                }
 
                 if (!SafeExecutor.TryToCapture(partner, out var partnerExec))
                 {
@@ -192,7 +200,7 @@ namespace MTSim.Objects.Animals
 
                 using (partnerExec)
                 {
-                    if (!CanBeProcessed(partner))
+                    if (!CanWorkWith(partner))
                     {
                         continue;
                     }
@@ -200,7 +208,10 @@ namespace MTSim.Objects.Animals
                     var newAnimals = BornNewAnimals(partner);
                     foreach (var newAnimal in newAnimals)
                     {
-                        Island.Add(newAnimal, Coords);
+                        if (Island.CanBeMovedTo(newAnimal, Coords))
+                        {
+                            Island.Add(newAnimal, Coords);
+                        }
                     }
                 }
             }

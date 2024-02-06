@@ -10,30 +10,15 @@ namespace MTSim.Utils.Java
     /// </summary>
     public sealed class ScheduledThreadPoolExecutor
     {
-        public static Task Schedule(Action action, TimeSpan delay)
-        {
-            return Task.Delay(delay).ContinueWith(_ =>
-            {
-                action();
-            });
-        }
-
-        public static Task<T> Schedule<T>(Func<T> callable, TimeSpan delay)
-        {
-            return Task.Delay(delay).ContinueWith(_ =>
-            {
-                return callable();
-            });
-        }
-
         public static Task ScheduleAtFixedRate(Func<CancellationToken, Task> runnable, TimeSpan initialDelay, TimeSpan period, CancellationToken cancellationToken)
         {
-            // don't like two awaits
-            return Task.Run(async () =>
+            var task = Task.Factory.StartNew(async () =>
             {
                 await Task.Delay(initialDelay, cancellationToken);
                 await ExecutionLoop(runnable, period, cancellationToken);
-            }, cancellationToken);
+            }, cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+
+            return task.Unwrap();
         }
 
         private static async Task ExecutionLoop(Func<CancellationToken, Task> runnable, TimeSpan period, CancellationToken cancellationToken)
@@ -46,11 +31,11 @@ namespace MTSim.Utils.Java
 
                 await runnable(cancellationToken);
 
-                await WaitAsync(started, Stopwatch.GetTimestamp(), periodSeconds, cancellationToken);
+                await WaitIfNeededAsync(started, Stopwatch.GetTimestamp(), periodSeconds, cancellationToken);
             }
         }
 
-        private static async ValueTask WaitAsync(long started, long finished, double periodSeconds, CancellationToken cancellationToken)
+        private static async ValueTask WaitIfNeededAsync(long started, long finished, double periodSeconds, CancellationToken cancellationToken)
         {
             var elapsedTicks = (double)(finished - started);
             var elapsedSeconds = elapsedTicks / Stopwatch.Frequency;

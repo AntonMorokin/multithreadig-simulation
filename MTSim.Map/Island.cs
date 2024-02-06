@@ -115,21 +115,21 @@ namespace MTSim.Map
             return location.AnyOfExcept(except);
         }
 
-        public GameObject GetRandomOfExcept(Point where, HashSet<string> typeNames, GameObject except)
+        public bool TryGetRandomOfExcept(Point where, HashSet<string> typeNames, GameObject except, out GameObject? random)
         {
             CheckIfDisposed();
 
             var location = Get(where);
-            return location.GetRandomOfExcept(typeNames, except);
+            return location.TryGetRandomOfExcept(typeNames, except, out random);
         }
 
-        public T GetRandomOfExcept<T>(Point where, T except)
+        public bool TryGetRandomOfExcept<T>(Point where, T except, out T? random)
             where T : GameObject
         {
             CheckIfDisposed();
 
             var location = Get(where);
-            return location.GetRandomOfExcept(except);
+            return location.TryGetRandomOfExcept(except, out random);
         }
 
         public void RemoveDeadObjects()

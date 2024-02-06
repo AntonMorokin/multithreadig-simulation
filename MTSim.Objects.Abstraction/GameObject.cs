@@ -24,25 +24,14 @@ namespace MTSim.Objects.Abstraction
 
         public void Act()
         {
-            if (!SafeExecutor.TryToCapture(this, out var exec))
-            {
-                return;
-            }
+            SafeExecutor exec;
+
+            while (!SafeExecutor.TryToCapture(this, out exec)) { }
 
             using (exec)
             {
                 ActInternal();
             }
-
-            //try
-            //{
-            //    _isInAction = IsInAction;
-            //    ActInternal();
-            //}
-            //finally
-            //{
-            //    _isInAction = IsFree;
-            //}
         }
 
         public bool TryToCapture()

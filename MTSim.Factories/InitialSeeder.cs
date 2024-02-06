@@ -28,9 +28,9 @@ namespace MTSim.Factories
 
                     foreach (var (typeName, capacity) in _config.ByTypeLocationCapacity)
                     {
-                        var possibility = capacity / 2;
+                        var count = (int)Math.Round(capacity * Random.Shared.NextDouble());
 
-                        for (var k = 0; k < Random.Shared.Next(possibility); k++)
+                        for (var k = 0; k < capacity; k++)
                         {
                             var obj = CreateByType(typeName, coords);
                             island.Add(obj, coords);

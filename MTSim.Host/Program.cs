@@ -10,6 +10,7 @@ namespace MTSim.Host
         static async Task Main(string[] args)
         {
             var cts = new CancellationTokenSource();
+            //cts.CancelAfter(TimeSpan.FromSeconds(30));
 
             Console.CancelKeyPress += (sender, e) =>
             {

@@ -11,19 +11,21 @@ namespace MTSim.Utils.Java
     /// </summary>
     public sealed class ThreadPoolExecutor
     {
-        public static Task<T> Submit<T>(Func<T> task)
-        {
-            return Task.Run(task);
-        }
-
-        public static Task Submit(Action task)
-        {
-            return Task.Run(task);
-        }
-
         public static Task InvokeAll(IEnumerable<Action> tasks, CancellationToken cancellationToken)
         {
             return Task.WhenAll(tasks.Select(task => Task.Run(task, cancellationToken)));
+        }
+
+        public static Task InvokeAll<T>(IEnumerable<T> source, Action<T> action, CancellationToken cancellationToken)
+        {
+            var threads = (int)Math.Ceiling(Environment.ProcessorCount * 0.8m);
+            var options = new ParallelOptions
+            {
+                MaxDegreeOfParallelism = threads,
+                CancellationToken = cancellationToken
+            };
+
+            return Task.Run(() => Parallel.ForEach(source, options, action), cancellationToken);
         }
 
         public static async Task<IReadOnlyCollection<T>> InvokeAll<T>(IEnumerable<Func<T>> tasks)

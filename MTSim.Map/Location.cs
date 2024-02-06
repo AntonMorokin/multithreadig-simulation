@@ -1,7 +1,6 @@
 ﻿using MTSim.Objects.Abstraction;
 using MTSim.Objects.Abstraction.Interfaces;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -13,7 +12,7 @@ namespace MTSim.Map
         private readonly LinkedList<GameObject> _objects = new();
         private readonly Dictionary<long, LinkedListNode<GameObject>> _objectsMap = new(64);
 
-        private readonly ReaderWriterLockSlim _sync = new();
+        private readonly ReaderWriterLockSlim _sync = new(LockRecursionPolicy.SupportsRecursion);
 
         private readonly Dictionary<string, int> _byTypeCapacity;
 
@@ -71,7 +70,7 @@ namespace MTSim.Map
         private static bool AnyOfExceptInternal(Location location, HashSet<string> typeNames, GameObject except)
         {
             return location._objects
-                .Where(x => typeNames.Contains(x.TypeName) && !object.Equals(x, except))
+                .Where(x => typeNames.Contains(x.TypeName) && x.Id != except.Id)
                 .Any();
         }
 
@@ -87,57 +86,61 @@ namespace MTSim.Map
             where T : GameObject
         {
             return location._objects
-                .OfType<T>()
-                .Where(x => !object.Equals(x, except))
+                .Where(x => x.TypeName == except.TypeName && x.Id != except.Id)
                 .Any();
         }
 
-        public GameObject GetRandomOfExcept(HashSet<string> typeNames, GameObject except)
+        public bool TryGetRandomOfExcept(HashSet<string> typeNames, GameObject except, out GameObject? random)
         {
             CheckIfDisposed();
 
-            return ExecSafeReading(this, typeNames, except, GetRandomOfExceptInternal);
+            var (found, result) = ExecSafeReading(this, typeNames, except, GetRandomOfExceptInternal);
+
+            random = result;
+            return found;
         }
 
-        private static GameObject GetRandomOfExceptInternal(Location location, HashSet<string> typeNames, GameObject except)
+        private static (bool found, GameObject? obj) GetRandomOfExceptInternal(Location location, HashSet<string> typeNames, GameObject except)
         {
             var objects = location._objects
-                .Where(x => typeNames.Contains(x.TypeName) && !object.Equals(x, except))
+                .Where(x => typeNames.Contains(x.TypeName) && x.Id != except.Id)
                 .ToArray();
 
             if (objects.Length == 0)
             {
-                throw new InvalidOperationException($"There is no other game objects of types {string.Join(", ", typeNames)}");
+                return (false, null);
             }
 
             var i = Random.Shared.Next(objects.Length);
-            return objects[i];
+            return (true, objects[i]);
         }
 
-        public T GetRandomOfExcept<T>(T except)
+        public bool TryGetRandomOfExcept<T>(T except, out T? random)
             where T : GameObject
         {
             CheckIfDisposed();
 
-            return ExecSafeReading(this, except, GetRandomOfExceptInternal);
+            var (found, result) = ExecSafeReading(this, except, GetRandomOfExceptInternal);
+
+            random = result;
+            return found;
         }
 
-        private static T GetRandomOfExceptInternal<T>(Location location, T except)
+        private static (bool found, T? obj) GetRandomOfExceptInternal<T>(Location location, T except)
             where T : GameObject
         {
             // TODO would be nice to not allocate new array on the heap
             var objects = location._objects
-                .OfType<T>()
-                .Where(x => !object.Equals(x, except)) // reference equality
+                .Where(x => x.TypeName == except.TypeName && x.Id != except.Id) // reference equality
                 .ToArray();
 
             if (objects.Length == 0)
             {
-                throw new InvalidOperationException($"There is no other game objects of type {typeof(T).Name}");
+                return (false, null);
             }
 
             var i = Random.Shared.Next(objects.Length);
-            return objects[i];
+            return (true, (T)objects[i]);
         }
 
         public void Add(GameObject obj)
@@ -249,18 +252,8 @@ namespace MTSim.Map
         {
             CheckIfDisposed();
 
-            _sync.EnterReadLock();
-            try
-            {
-                foreach (var obj in _objects)
-                {
-                    yield return obj;
-                }
-            }
-            finally
-            {
-                _sync.ExitReadLock();
-            }
+            // Need to copy because the list is changed
+            return _objects.ToArray();
         }
     }
 }

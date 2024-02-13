@@ -1,10 +1,11 @@
-﻿using System.Diagnostics;
+﻿using MTSim.Utils;
+using System.Diagnostics;
 
 namespace MTSim.Objects.Abstraction.Utils
 {
     public ref struct SafeExecutor
     {
-        private static TimeSpan Timeout = TimeSpan.FromMicroseconds(100);
+        private static TimeSpan Timeout = TimeSpan.FromMicroseconds(10);
         private static double TimeoutSeconds = Timeout.TotalSeconds;
 
         private readonly GameObject _obj;
@@ -36,7 +37,7 @@ namespace MTSim.Objects.Abstraction.Utils
 
         private static bool TimeIsOver(long started, long finished)
         {
-            var elapsedSeconds = (double)(finished - started) / Stopwatch.Frequency;
+            var elapsedSeconds = StopwatchHelper.ElapsedSeconds(started, finished);
             return elapsedSeconds > TimeoutSeconds;
         }
 

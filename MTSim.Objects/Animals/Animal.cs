@@ -3,6 +3,7 @@ using MTSim.Map.Interfaces;
 using MTSim.Objects.Abstraction;
 using MTSim.Objects.Abstraction.Interfaces;
 using MTSim.Objects.Abstraction.Utils;
+using MTSim.Objects.Factories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,37 +19,37 @@ namespace MTSim.Objects.Animals
         /// <summary>
         /// Максимальная скорость перемещения в клетках
         /// </summary>
-        protected int MaxSpeed { get; }
+        public virtual int MaxSpeed { get; }
 
         /// <summary>
         /// Кг еды до полного насыщения
         /// </summary>
-        protected double MaxSatiety { get; }
+        public virtual double MaxSatiety { get; }
 
         /// <summary>
         /// Вектор пищи с вероятностью того, что она будет съедена
         /// </summary>
-        protected Dictionary<string, double> WhatCanBeEaten { get; }
+        public virtual IReadOnlyDictionary<string, double> WhatCanBeEaten { get; }
 
         /// <summary>
         /// Вес
         /// </summary>
-        public double Weight { get; }
+        public virtual double Weight { get; }
 
         /// <summary>
         /// Текущее насыщение
         /// </summary>
-        public double CurrentSatiety { get; protected set; }
+        public virtual double CurrentSatiety { get; set; }
 
         /// <summary>
         /// Скорость потери насыщения
         /// </summary>
-        protected double SatietyDecreaseSpeed { get; }
+        public virtual double SatietyDecreaseSpeed { get; }
 
         /// <summary>
         /// Признак того, что животное голодно
         /// </summary>
-        public bool IsHungry => 2 * CurrentSatiety < MaxSatiety; // Current is less than half of Max
+        public virtual bool IsHungry => 2 * CurrentSatiety < MaxSatiety; // Current is less than half of Max
 
         /// <summary>
         /// Признак того, что животное мертво
@@ -58,14 +59,14 @@ namespace MTSim.Objects.Animals
         /// <summary>
         /// Остров, на котором находится животное
         /// </summary>
-        public Island Island { get; }
+        public virtual Island Island { get; }
 
         /// <summary>
         /// Координаты животного на острове
         /// </summary>
-        public Point Coords { get; protected set; }
+        public virtual Point Coords { get; set; }
 
-        protected Animal(int id, Island island, Point coords, int maxSpeed, double maxSatiety, double weight, Dictionary<string, double> food)
+        protected Animal(long id, Island island, Point coords, int maxSpeed, double maxSatiety, double weight, IReadOnlyDictionary<string, double> food)
             : base(id)
         {
             Island = island;
@@ -76,8 +77,8 @@ namespace MTSim.Objects.Animals
             WhatCanBeEaten = food;
 
             _typesCanBeEaten = food.Keys.ToHashSet();
-            CurrentSatiety = MaxSatiety;
-            SatietyDecreaseSpeed = Weight / 10d;
+            CurrentSatiety = maxSatiety;
+            SatietyDecreaseSpeed = maxSatiety / 8d;
         }
 
         protected override void ActInternal()
@@ -119,7 +120,7 @@ namespace MTSim.Objects.Animals
             Move();
         }
 
-        protected virtual void Eat()
+        public virtual void Eat()
         {
             const int MaxAttempts = 3;
 
@@ -181,7 +182,7 @@ namespace MTSim.Objects.Animals
             return true;
         }
 
-        protected virtual void Reproduce()
+        public virtual void Reproduce()
         {
             const int MaxAttempts = 3;
 
@@ -217,9 +218,27 @@ namespace MTSim.Objects.Animals
             }
         }
 
-        protected abstract IReadOnlyCollection<Animal> BornNewAnimals(Animal partner);
+        public abstract IReadOnlyCollection<Animal> BornNewAnimals(Animal partner);
 
-        protected virtual void Move()
+        protected virtual IReadOnlyCollection<Animal> BornNewAnimalsTemplate(
+            Animal partner,
+            int maxChilderNumber,
+            IAnimalsFactory factory,
+            Func<Point, IAnimalsFactory, Animal> creator)
+        {
+            var number = Random.Shared.Next(maxChilderNumber + 1);
+            if (number == 0)
+            {
+                return Array.Empty<Animal>();
+            }
+
+            return Enumerable
+                .Range(0, number)
+                .Select(x => creator(Coords, factory))
+                .ToArray();
+        }
+
+        public virtual void Move()
         {
             const int MaxAttempts = 3;
 

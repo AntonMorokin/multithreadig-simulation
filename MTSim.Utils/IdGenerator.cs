@@ -4,8 +4,8 @@ namespace MTSim.Utils
 {
     public sealed class IdGenerator
     {
-        private int _id = -1;
+        private long _id = -1;
 
-        public int GetNextId() => Interlocked.Increment(ref _id);
+        public long GetNextId() => Interlocked.Increment(ref _id);
     }
 }

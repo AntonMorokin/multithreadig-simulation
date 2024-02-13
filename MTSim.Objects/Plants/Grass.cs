@@ -7,7 +7,7 @@ namespace MTSim.Objects.Plants
     {
         public override string TypeName => TypeNames.Grass;
 
-        public Grass(int id, Island island, Point coords, double growSpeed, double weight)
+        public Grass(long id, Island island, Point coords, double growSpeed, double weight)
             : base(id, island, coords, growSpeed, weight)
         {
         }

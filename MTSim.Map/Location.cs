@@ -190,6 +190,32 @@ namespace MTSim.Map
             }
         }
 
+        public IEnumerable<GameObject> GetObjects()
+        {
+            CheckIfDisposed();
+
+            return ExecSafeReading(this, GetObjectsInternal);
+        }
+
+        private static IEnumerable<GameObject> GetObjectsInternal(Location location)
+        {
+            // Need to copy because the list is changed
+            return location._objects.ToArray();
+        }
+
+        private TRes ExecSafeReading<TRes>(Location location, Func<Location, TRes> func)
+        {
+            _sync.EnterReadLock();
+            try
+            {
+                return func(location);
+            }
+            finally
+            {
+                _sync.ExitReadLock();
+            }
+        }
+
         private TRes ExecSafeReading<TArg, TRes>(Location location, TArg arg, Func<Location, TArg, TRes> func)
         {
             _sync.EnterReadLock();
@@ -244,16 +270,13 @@ namespace MTSim.Map
 
         public void Dispose()
         {
+            if (_disposed)
+            {
+                return;
+            }
+
             _disposed = true;
             _sync.Dispose();
-        }
-
-        public IEnumerable<GameObject> GetObjects()
-        {
-            CheckIfDisposed();
-
-            // Need to copy because the list is changed
-            return _objects.ToArray();
         }
     }
 }

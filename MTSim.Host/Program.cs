@@ -1,4 +1,5 @@
-﻿using MTSim.Game;
+﻿using Microsoft.Extensions.Logging;
+using MTSim.Game;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,9 +19,18 @@ namespace MTSim.Host
                 e.Cancel = true;
             };
 
+            var loggerFactory = LoggerFactory.Create(x =>
+            {
+                x.AddConsole();
+            });
+
+            var logger = loggerFactory.CreateLogger("game");
+
             using var disposable = await GameBuilder
-                .InitGame("D:\\repos\\Simulation\\MTSim\\gameConfig.json", "D:\\repos\\Simulation\\MTSim\\foodMatrix.csv")
+                .InitGame("D:\\repos\\Simulation\\MTSim\\gameConfig.json", "D:\\repos\\Simulation\\MTSim\\foodMatrix.csv", logger)
                 .RunAsync(cts.Token);
+
+            logger.LogInformation("Finished");
         }
     }
 }

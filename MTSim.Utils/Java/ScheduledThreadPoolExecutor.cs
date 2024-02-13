@@ -21,6 +21,17 @@ namespace MTSim.Utils.Java
             return task.Unwrap();
         }
 
+        public static Task ScheduleAtFixedRate(Action runnable, TimeSpan initialDelay, TimeSpan period, CancellationToken cancellationToken)
+        {
+            var task = Task.Factory.StartNew(async () =>
+            {
+                await Task.Delay(initialDelay, cancellationToken);
+                await ExecutionLoop(runnable, period, cancellationToken);
+            }, cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+
+            return task.Unwrap();
+        }
+
         private static async Task ExecutionLoop(Func<CancellationToken, Task> runnable, TimeSpan period, CancellationToken cancellationToken)
         {
             var periodSeconds = period.TotalSeconds;
@@ -35,10 +46,23 @@ namespace MTSim.Utils.Java
             }
         }
 
+        private static async Task ExecutionLoop(Action runnable, TimeSpan period, CancellationToken cancellationToken)
+        {
+            var periodSeconds = period.TotalSeconds;
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var started = Stopwatch.GetTimestamp();
+
+                runnable();
+
+                await WaitIfNeededAsync(started, Stopwatch.GetTimestamp(), periodSeconds, cancellationToken);
+            }
+        }
+
         private static async ValueTask WaitIfNeededAsync(long started, long finished, double periodSeconds, CancellationToken cancellationToken)
         {
-            var elapsedTicks = (double)(finished - started);
-            var elapsedSeconds = elapsedTicks / Stopwatch.Frequency;
+            var elapsedSeconds = StopwatchHelper.ElapsedSeconds(started, finished);
             var needToWait = periodSeconds - elapsedSeconds;
 
             if (needToWait > 0)

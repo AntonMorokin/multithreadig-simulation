@@ -13,29 +13,29 @@ namespace MTSim.Objects.Plants
         /// <summary>
         /// Скорость роста
         /// </summary>
-        protected double GrowSpeed { get; }
+        public virtual double GrowSpeed { get; }
 
         /// <summary>
         /// Вес
         /// </summary>
-        public double Weight { get; protected set; }
+        public virtual double Weight { get; set; }
 
         /// <summary>
         /// Остров, на котором находится животное
         /// </summary>
-        public Island Island { get; }
+        public virtual Island Island { get; }
 
         /// <summary>
         /// Координаты животного на острове
         /// </summary>
-        public Point Coords { get; }
+        public virtual Point Coords { get; }
 
         /// <summary>
         /// Признак того, что растение мертво
         /// </summary>
-        public bool IsDead => false; // cannot die
+        public virtual bool IsDead => false; // cannot die
 
-        protected Plant(int id, Island island, Point coords, double growSpeed, double weight)
+        protected Plant(long id, Island island, Point coords, double growSpeed, double weight)
             : base(id)
         {
             Island = island;
@@ -49,7 +49,7 @@ namespace MTSim.Objects.Plants
             Grow();
         }
 
-        protected virtual void Grow()
+        public virtual void Grow()
         {
             var coef = Random.Shared.NextDouble() + 0.5d;
             Weight += GrowSpeed * coef; // [+0.5*GrowSpeed...+1.5*GrowSpeed]

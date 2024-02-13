@@ -11,6 +11,8 @@ namespace MTSim.Utils.Java
     /// </summary>
     public sealed class ThreadPoolExecutor
     {
+        private static readonly int Threads = (int)Math.Ceiling(Environment.ProcessorCount * 0.8m);
+
         public static Task InvokeAll(IEnumerable<Action> tasks, CancellationToken cancellationToken)
         {
             return Task.WhenAll(tasks.Select(task => Task.Run(task, cancellationToken)));
@@ -18,10 +20,9 @@ namespace MTSim.Utils.Java
 
         public static Task InvokeAll<T>(IEnumerable<T> source, Action<T> action, CancellationToken cancellationToken)
         {
-            var threads = (int)Math.Ceiling(Environment.ProcessorCount * 0.8m);
             var options = new ParallelOptions
             {
-                MaxDegreeOfParallelism = threads,
+                MaxDegreeOfParallelism = Threads,
                 CancellationToken = cancellationToken
             };
 

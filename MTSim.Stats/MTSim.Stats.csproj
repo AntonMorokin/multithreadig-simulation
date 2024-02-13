@@ -7,12 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\MTSim.Factories\MTSim.Factories.csproj" />
-    <ProjectReference Include="..\MTSim.Stats\MTSim.Stats.csproj" />
   </ItemGroup>
 
 </Project>

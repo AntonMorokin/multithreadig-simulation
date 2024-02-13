@@ -40,7 +40,6 @@ namespace MTSim.Map
             }, byTypeLocationCapacity);
         }
 
-        // TODO would be nice to create own enumerator based on ref struct
         private void ForEachLocation(Action<Location> action)
         {
             for (var j = 0; j < Height; j++)
@@ -146,6 +145,11 @@ namespace MTSim.Map
 
         public void Dispose()
         {
+            if (_disposed)
+            {
+                return;
+            }
+
             _disposed = true;
 
             ForEachLocation(static (location) => location.Dispose());

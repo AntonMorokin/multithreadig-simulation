@@ -5,7 +5,7 @@ namespace MTSim.Objects.Animals.Predators
 {
     public abstract class Predator : Animal
     {
-        protected Predator(int id, Island island, Point coords, int maxSpeed, double maxSatiety, double weight, Dictionary<string, double> food)
+        protected Predator(long id, Island island, Point coords, int maxSpeed, double maxSatiety, double weight, Dictionary<string, double> food)
             : base(id, island, coords, maxSpeed, maxSatiety, weight, food)
         {
         }

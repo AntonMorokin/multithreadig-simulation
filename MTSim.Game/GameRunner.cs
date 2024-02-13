@@ -1,18 +1,25 @@
 ﻿using MTSim.Game.Interfaces;
 using MTSim.Map;
+using MTSim.Stats;
+using MTSim.Stats.Printers;
+using MTSim.Utils;
 using MTSim.Utils.Java;
 
 namespace MTSim.Game
 {
     internal sealed class GameRunner : IInitializedGame
     {
-        private static readonly TimeSpan CycleDuration = TimeSpan.FromMilliseconds(500); // can be moved to config
+        private static readonly TimeSpan CycleDuration = TimeSpan.FromMilliseconds(1000); // can be moved to config
 
         private readonly Island _island;
+        private readonly StatsCollector _statsCollector;
+        private readonly IStatsPrinter _statsPrinter;
 
-        public GameRunner(Island island)
+        public GameRunner(Island island, StatsCollector statsCollector, IStatsPrinter statsPrinter)
         {
             _island = island;
+            _statsCollector = statsCollector;
+            _statsPrinter = statsPrinter;
         }
 
         public async Task<IDisposable> RunAsync(CancellationToken cancellationToken)
@@ -20,7 +27,8 @@ namespace MTSim.Game
             try
             {
                 var simulationTask = ScheduledThreadPoolExecutor.ScheduleAtFixedRate(MakeSimulationCycleAsync, TimeSpan.Zero, CycleDuration, cancellationToken);
-                var statsTask = ScheduledThreadPoolExecutor.ScheduleAtFixedRate(CollectStatsAsync, CycleDuration / 2, CycleDuration, cancellationToken);
+                var statsTask = ScheduledThreadPoolExecutor.ScheduleAtFixedRate(CollectStats, CycleDuration / 2, CycleDuration, cancellationToken);
+                //var statsTask = Task.CompletedTask;
 
                 await Task.WhenAll(simulationTask, statsTask);
             }
@@ -28,24 +36,23 @@ namespace MTSim.Game
             {
             }
 
-            return _island;
+            return new CompositeDisposable(_island, _statsCollector);
         }
 
         private async Task MakeSimulationCycleAsync(CancellationToken cancellationToken)
         {
-#if DEBUG
-            Console.WriteLine($"{DateTime.Now:O}: New cycle! Objects count: {_island.GetObjects().Count()}");
-#endif
+            _statsCollector.StartCycle();
 
             await ThreadPoolExecutor.InvokeAll(_island.GetObjects(), static x => x.Act(), cancellationToken);
-
             _island.RemoveDeadObjects();
+
+            _statsCollector.FinishCycle();
         }
 
-        private Task CollectStatsAsync(CancellationToken cancellationToken)
+        private void CollectStats()
         {
-            // TODO to be implemented
-            return Task.CompletedTask;
+            var snapshot = _statsCollector.GetSnapshot();
+            _statsPrinter.Print(snapshot);
         }
     }
 }

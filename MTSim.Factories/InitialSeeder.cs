@@ -30,7 +30,7 @@ namespace MTSim.Factories
                     {
                         var count = (int)Math.Round(capacity * Random.Shared.NextDouble());
 
-                        for (var k = 0; k < capacity; k++)
+                        for (var k = 0; k < count; k++)
                         {
                             var obj = CreateByType(typeName, coords);
                             island.Add(obj, coords);

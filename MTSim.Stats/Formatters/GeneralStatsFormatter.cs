@@ -28,7 +28,7 @@ namespace MTSim.Stats.Formatters
 
             sb.Append("Cycle duration: ").Append(snapshot.CycleDuration.TotalMilliseconds.ToString("F3")).AppendLine("ms");
 
-            FormatStats(sb, "Total objects on the island: ", snapshot.Total, "    ");
+            FormatStats(sb, "Acted total: ", snapshot.Total, "    ");
             FormatStats(sb, "Moved total: ", snapshot.Moved, "    ");
             FormatStats(sb, "Born total: ", snapshot.Born, "    ");
             FormatStats(sb, "Grew total: ", snapshot.Grew, "    ");

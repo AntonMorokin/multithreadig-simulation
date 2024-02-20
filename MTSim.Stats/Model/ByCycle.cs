@@ -8,12 +8,12 @@ namespace MTSim.Stats.Model
     {
         private readonly ReaderWriterLockSlim _sync = new();
 
-        private readonly ConcurrentDictionary<string, Counter> _total = new(); // who acted +
+        private readonly ConcurrentDictionary<string, Counter> _total = new(); // who acted
         private readonly ConcurrentDictionary<string, Counter> _moved = new(); // who moved
-        private readonly ConcurrentDictionary<string, Counter> _eaten = new(); // who was eaten +
-        private readonly ConcurrentDictionary<string, Counter> _born = new(); // who was born +
+        private readonly ConcurrentDictionary<string, Counter> _eaten = new(); // who was eaten
+        private readonly ConcurrentDictionary<string, Counter> _born = new(); // who was born
         private readonly ConcurrentDictionary<string, Counter> _grew = new(); // who grew
-        private readonly ConcurrentDictionary<string, Counter> _dead = new(); // who got dead +
+        private readonly ConcurrentDictionary<string, Counter> _dead = new(); // who got dead
 
         private long _startedTimestamp = -1;
         private TimeSpan _cycleDuration;

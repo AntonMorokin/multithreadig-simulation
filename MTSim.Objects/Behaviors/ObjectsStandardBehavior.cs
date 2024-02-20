@@ -40,7 +40,7 @@ public class ObjectsStandardBehavior : IObjectsBehavior
             if (island.AnyOfExcept(animal.Coords, animal.CanBeEaten, animal))
             {
                 // It's hungry and here is something to eat
-                Move(animal);
+                Eat(animal);
                 return;
             }
         }

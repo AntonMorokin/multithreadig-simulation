@@ -8,12 +8,12 @@ namespace MTSim.Stats.Model
     {
         private readonly ReaderWriterLockSlim _sync = new();
 
-        private readonly ConcurrentDictionary<string, Counter> _total = new();
-        private readonly ConcurrentDictionary<string, Counter> _moved = new();
-        private readonly ConcurrentDictionary<string, Counter> _eaten = new();
-        private readonly ConcurrentDictionary<string, Counter> _born = new();
-        private readonly ConcurrentDictionary<string, Counter> _grew = new();
-        private readonly ConcurrentDictionary<string, Counter> _dead = new();
+        private readonly ConcurrentDictionary<string, Counter> _total = new(); // who acted +
+        private readonly ConcurrentDictionary<string, Counter> _moved = new(); // who moved
+        private readonly ConcurrentDictionary<string, Counter> _eaten = new(); // who was eaten +
+        private readonly ConcurrentDictionary<string, Counter> _born = new(); // who was born +
+        private readonly ConcurrentDictionary<string, Counter> _grew = new(); // who grew
+        private readonly ConcurrentDictionary<string, Counter> _dead = new(); // who got dead +
 
         private long _startedTimestamp = -1;
         private TimeSpan _cycleDuration;
@@ -32,7 +32,7 @@ namespace MTSim.Stats.Model
             _sync.EnterReadLock();
             try
             {
-                var counter = dict.GetOrAdd(typeName, x => new Counter());
+                var counter = dict.GetOrAdd(typeName, _ => new Counter());
                 counter.Increment();
             }
             finally

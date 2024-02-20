@@ -1,5 +1,6 @@
 ﻿using MTSim.Map;
 using MTSim.Objects.Abstraction;
+using MTSim.Objects.Behaviors;
 
 namespace MTSim.Objects.Plants
 {
@@ -7,8 +8,8 @@ namespace MTSim.Objects.Plants
     {
         public override string TypeName => TypeNames.Grass;
 
-        public Grass(long id, Island island, Point coords, double growSpeed, double weight)
-            : base(id, island, coords, growSpeed, weight)
+        public Grass(long id, Island island, Point coords, PlantProps props, IObjectsBehavior behavior)
+            : base(id, island, coords, props, behavior)
         {
         }
     }

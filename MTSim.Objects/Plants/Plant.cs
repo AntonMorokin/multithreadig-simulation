@@ -3,6 +3,7 @@ using MTSim.Map.Interfaces;
 using MTSim.Objects.Abstraction;
 using MTSim.Objects.Abstraction.Interfaces;
 using System;
+using MTSim.Objects.Behaviors;
 
 namespace MTSim.Objects.Plants
 {
@@ -10,43 +11,46 @@ namespace MTSim.Objects.Plants
     {
         protected const double MinWeight = 0.1d;
 
-        /// <summary>
-        /// Скорость роста
-        /// </summary>
-        public virtual double GrowSpeed { get; }
-
-        /// <summary>
-        /// Вес
-        /// </summary>
-        public virtual double Weight { get; set; }
+        protected readonly IObjectsBehavior Behavior;
 
         /// <summary>
         /// Остров, на котором находится животное
         /// </summary>
-        public virtual Island Island { get; }
+        public Island Island { get; }
 
         /// <summary>
         /// Координаты животного на острове
         /// </summary>
-        public virtual Point Coords { get; }
+        public Point Coords { get; }
+
+        /// <summary>
+        /// Скорость роста
+        /// </summary>
+        public double GrowSpeed { get; }
+
+        /// <summary>
+        /// Вес
+        /// </summary>
+        public double Weight { get; protected set; }
 
         /// <summary>
         /// Признак того, что растение мертво
         /// </summary>
         public virtual bool IsDead => false; // cannot die
 
-        protected Plant(long id, Island island, Point coords, double growSpeed, double weight)
+        protected Plant(long id, Island island, Point coords, PlantProps props, IObjectsBehavior behavior)
             : base(id)
         {
+            Behavior = behavior;
             Island = island;
             Coords = coords;
-            GrowSpeed = growSpeed;
-            Weight = weight;
+            GrowSpeed = props.GrowSpeed;
+            Weight = props.Weight;
         }
 
-        protected override void ActInternal()
+        public override void Act()
         {
-            Grow();
+            Behavior.Act(this);
         }
 
         public virtual void Grow()

@@ -15,21 +15,9 @@ namespace MTSim.Objects.Abstraction
 
         public bool IsCaptured => _isInAction == IsInAction;
 
-        public GameObject(long id)
+        protected GameObject(long id)
         {
             Id = id;
-        }
-
-        public virtual void Act()
-        {
-            SafeExecutor exec;
-
-            while (!SafeExecutor.TryToCapture(this, out exec)) { }
-
-            using (exec)
-            {
-                ActInternal();
-            }
         }
 
         public virtual bool TryToCapture()
@@ -42,7 +30,7 @@ namespace MTSim.Objects.Abstraction
             Interlocked.Exchange(ref _isInAction, IsFree);
         }
 
-        protected abstract void ActInternal();
+        public abstract void Act();
 
         protected void ThrowIfNotCaptured()
         {

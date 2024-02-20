@@ -3,10 +3,9 @@ using System.Diagnostics;
 
 namespace MTSim.Objects.Abstraction.Utils
 {
-    public ref struct SafeExecutor
+    public readonly ref struct SafeExecutor
     {
-        private static TimeSpan Timeout = TimeSpan.FromMicroseconds(10);
-        private static double TimeoutSeconds = Timeout.TotalSeconds;
+        private static double TimeoutSeconds = TimeSpan.FromMicroseconds(10).TotalSeconds;
 
         private readonly GameObject _obj;
         private readonly bool _captured;

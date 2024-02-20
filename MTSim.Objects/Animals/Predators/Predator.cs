@@ -1,12 +1,19 @@
 ﻿using MTSim.Map;
-using System.Collections.Generic;
+using MTSim.Objects.Behaviors;
+using MTSim.Objects.Factories;
 
 namespace MTSim.Objects.Animals.Predators
 {
     public abstract class Predator : Animal
     {
-        protected Predator(long id, Island island, Point coords, int maxSpeed, double maxSatiety, double weight, Dictionary<string, double> food)
-            : base(id, island, coords, maxSpeed, maxSatiety, weight, food)
+        protected Predator(
+            long id,
+            Island island,
+            Point coords,
+            AnimalProps props,
+            IObjectsBehavior behavior,
+            IAnimalsFactory factory)
+            : base(id, island, coords, props, behavior, factory)
         {
         }
     }

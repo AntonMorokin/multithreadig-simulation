@@ -9,5 +9,6 @@ namespace MTSim.Objects.Factories
         Animal CreateDuck(Point coords);
         Animal CreateFox(Point coords);
         Animal CreateWolf(Point coords);
+        Animal Create(string typeName, Point coords);
     }
 }

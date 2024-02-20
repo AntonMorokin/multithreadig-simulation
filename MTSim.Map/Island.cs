@@ -97,7 +97,7 @@ namespace MTSim.Map
             return location.CanBeMovedTo(obj);
         }
 
-        public bool AnyOfExcept(Point where, HashSet<string> typeNames, GameObject except)
+        public bool AnyOfExcept(Point where, IReadOnlySet<string> typeNames, GameObject except)
         {
             CheckIfDisposed();
 
@@ -114,7 +114,7 @@ namespace MTSim.Map
             return location.AnyOfExcept(except);
         }
 
-        public bool TryGetRandomOfExcept(Point where, HashSet<string> typeNames, GameObject except, out GameObject? random)
+        public bool TryGetRandomOfExcept(Point where, IReadOnlySet<string> typeNames, GameObject except, out GameObject? random)
         {
             CheckIfDisposed();
 

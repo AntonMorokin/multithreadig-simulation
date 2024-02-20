@@ -7,6 +7,7 @@ using MTSim.Objects.Factories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MTSim.Objects.Behaviors;
 
 namespace MTSim.Objects.Animals
 {
@@ -14,120 +15,109 @@ namespace MTSim.Objects.Animals
     {
         protected const double MinSatiety = 0d;
 
-        protected readonly HashSet<string> _typesCanBeEaten;
-
-        /// <summary>
-        /// Максимальная скорость перемещения в клетках
-        /// </summary>
-        public virtual int MaxSpeed { get; }
-
-        /// <summary>
-        /// Кг еды до полного насыщения
-        /// </summary>
-        public virtual double MaxSatiety { get; }
-
-        /// <summary>
-        /// Вектор пищи с вероятностью того, что она будет съедена
-        /// </summary>
-        public virtual IReadOnlyDictionary<string, double> WhatCanBeEaten { get; }
-
-        /// <summary>
-        /// Вес
-        /// </summary>
-        public virtual double Weight { get; }
-
-        /// <summary>
-        /// Текущее насыщение
-        /// </summary>
-        public virtual double CurrentSatiety { get; set; }
-
-        /// <summary>
-        /// Скорость потери насыщения
-        /// </summary>
-        public virtual double SatietyDecreaseSpeed { get; }
-
-        /// <summary>
-        /// Признак того, что животное голодно
-        /// </summary>
-        public virtual bool IsHungry => 2 * CurrentSatiety < MaxSatiety; // Current is less than half of Max
-
-        /// <summary>
-        /// Признак того, что животное мертво
-        /// </summary>
-        public virtual bool IsDead => CurrentSatiety <= MinSatiety;
+        protected readonly IObjectsBehavior Behavior;
+        protected readonly IAnimalsFactory Factory;
 
         /// <summary>
         /// Остров, на котором находится животное
         /// </summary>
-        public virtual Island Island { get; }
+        public Island Island { get; }
 
         /// <summary>
         /// Координаты животного на острове
         /// </summary>
-        public virtual Point Coords { get; set; }
+        public Point Coords { get; protected set; }
 
-        protected Animal(long id, Island island, Point coords, int maxSpeed, double maxSatiety, double weight, IReadOnlyDictionary<string, double> food)
+        /// <summary>
+        /// Максимальная скорость перемещения в клетках
+        /// </summary>
+        public int MaxSpeed { get; }
+
+        /// <summary>
+        /// Вес
+        /// </summary>
+        public double Weight { get; }
+
+        /// <summary>
+        /// Пища и вероятность того, что она будет съедена
+        /// </summary>
+        public IReadOnlyDictionary<string, double> WhatCanBeEaten { get; }
+
+        /// <summary>
+        /// Что может быть съедено
+        /// </summary>
+        public readonly IReadOnlySet<string> CanBeEaten;
+
+        /// <summary>
+        /// Кг еды до полного насыщения
+        /// </summary>
+        public double MaxSatiety { get; }
+
+        /// <summary>
+        /// Текущее насыщение
+        /// </summary>
+        public double CurrentSatiety { get; protected set; }
+
+        /// <summary>
+        /// Скорость потери насыщения
+        /// </summary>
+        public double SatietyDecreaseSpeed { get; }
+
+        /// <summary>
+        /// Признак того, что животное голодно
+        /// </summary>
+        public bool IsHungry => 2 * CurrentSatiety < MaxSatiety; // Current is less than half of Max
+
+        /// <summary>
+        /// Признак того, что животное мертво
+        /// </summary>
+        public bool IsDead => CurrentSatiety <= MinSatiety;
+
+        /// <summary>
+        /// Максимальное количество рождаемых детей
+        /// </summary>
+        public abstract int MaxChildrenCount { get; }
+
+        protected Animal(
+            long id,
+            Island island,
+            Point coords,
+            AnimalProps props,
+            IObjectsBehavior behavior,
+            IAnimalsFactory factory)
             : base(id)
         {
             Island = island;
             Coords = coords;
-            MaxSpeed = maxSpeed;
-            MaxSatiety = maxSatiety;
-            Weight = weight;
-            WhatCanBeEaten = food;
 
-            _typesCanBeEaten = food.Keys.ToHashSet();
-            CurrentSatiety = maxSatiety;
-            SatietyDecreaseSpeed = maxSatiety / 8d;
+            MaxSpeed = props.MaxSpeed;
+            MaxSatiety = props.MaxSatiety;
+            Weight = props.Weight;
+            WhatCanBeEaten = props.Food;
+
+            Behavior = behavior;
+            Factory = factory;
+
+            CanBeEaten = props.Food.Keys.ToHashSet();
+            CurrentSatiety = props.MaxSatiety;
+            SatietyDecreaseSpeed = props.MaxSatiety / 8d;
         }
 
-        protected override void ActInternal()
+        public override void Act()
         {
-            Live();
-            FinishAct();
+            Behavior.Act(this);
         }
 
-        private void Live()
-        {
-            if (IsHungry)
-            {
-                if (Island.AnyOfExcept(Coords, _typesCanBeEaten, this))
-                {
-                    // It's hungry and here is something to eat
-                    Eat();
-                }
-                else
-                {
-                    // It's hungry and but here is nothing to eat. Leave location
-                    Move();
-                }
-
-                return;
-            }
-
-            var wantToReproduce = Random.Shared.NextDouble() < 0.5d;
-            if (wantToReproduce)
-            {
-                if (Island.AnyOfExcept(Coords, this))
-                {
-                    // It wants to reproduce and here is someone to do so with
-                    Reproduce();
-                    return;
-                }
-            }
-
-            // It wants to reproduce but here is noone to do so with. Leave location
-            Move();
-        }
-
-        public virtual void Eat()
+        public virtual GameObject? Eat()
         {
             const int MaxAttempts = 3;
+
+            ThrowIfNotCaptured();
 
             for (var i = 0; i < MaxAttempts; i++)
             {
                 GameObject victim;
-                if (!Island.TryGetRandomOfExcept(Coords, _typesCanBeEaten, this, out victim!))
+                if (!Island.TryGetRandomOfExcept(Coords, CanBeEaten, this, out victim!))
                 {
                     continue;
                 }
@@ -147,20 +137,25 @@ namespace MTSim.Objects.Animals
 
                     if (victim is not ICanBeEaten knownVictim)
                     {
-                        throw new InvalidOperationException($"Found victim of unknown type: {victim.GetType().FullName}");
+                        throw new InvalidOperationException(
+                            $"Found victim of unknown type: {victim.GetType().FullName}");
                     }
 
                     var possibility = WhatCanBeEaten[victim.TypeName];
-                    var catched = Random.Shared.NextDouble() <= possibility;
+                    var caught = Random.Shared.NextDouble() <= possibility;
 
-                    if (catched)
+                    if (caught)
                     {
                         var eaten = knownVictim.BeEaten();
                         var newSatiety = CurrentSatiety + eaten;
                         CurrentSatiety = Math.Min(newSatiety, MaxSatiety);
+
+                        return victim;
                     }
                 }
             }
+
+            return null;
         }
 
         private bool CanWorkWith(GameObject obj)
@@ -182,9 +177,11 @@ namespace MTSim.Objects.Animals
             return true;
         }
 
-        public virtual void Reproduce()
+        public virtual IReadOnlyCollection<Animal> Reproduce()
         {
             const int MaxAttempts = 3;
+
+            ThrowIfNotCaptured();
 
             for (var i = 0; i < MaxAttempts; i++)
             {
@@ -207,26 +204,27 @@ namespace MTSim.Objects.Animals
                     }
 
                     var newAnimals = BornNewAnimals(partner);
+                    var added = new List<Animal>(newAnimals.Count);
+
                     foreach (var newAnimal in newAnimals)
                     {
                         if (Island.CanBeMovedTo(newAnimal, Coords))
                         {
                             Island.Add(newAnimal, Coords);
+                            added.Add(newAnimal);
                         }
                     }
+
+                    return added;
                 }
             }
+
+            return Array.Empty<Animal>();
         }
 
-        public abstract IReadOnlyCollection<Animal> BornNewAnimals(Animal partner);
-
-        protected virtual IReadOnlyCollection<Animal> BornNewAnimalsTemplate(
-            Animal partner,
-            int maxChilderNumber,
-            IAnimalsFactory factory,
-            Func<Point, IAnimalsFactory, Animal> creator)
+        protected virtual IReadOnlyCollection<Animal> BornNewAnimals(Animal partner)
         {
-            var number = Random.Shared.Next(maxChilderNumber + 1);
+            var number = Random.Shared.Next(MaxChildrenCount + 1);
             if (number == 0)
             {
                 return Array.Empty<Animal>();
@@ -234,17 +232,19 @@ namespace MTSim.Objects.Animals
 
             return Enumerable
                 .Range(0, number)
-                .Select(x => creator(Coords, factory))
+                .Select(_ => Factory.Create(TypeName, Coords))
                 .ToArray();
         }
 
-        public virtual void Move()
+        public virtual bool Move()
         {
             const int MaxAttempts = 3;
 
+            ThrowIfNotCaptured();
+
             if (MaxSpeed <= 0)
             {
-                return;
+                return false;
             }
 
             for (var i = 0; i < MaxAttempts; i++)
@@ -255,10 +255,11 @@ namespace MTSim.Objects.Animals
                 {
                     Island.Move(this, Coords, newCoords);
                     Coords = newCoords;
-                    return;
+                    return true;
                 }
             }
 
+            return false;
         }
 
         private Point CreateNextPoint()
@@ -272,13 +273,15 @@ namespace MTSim.Objects.Animals
             return new Point(newX, newY);
         }
 
-        private int RoundToInterval(int min, int value, int max)
+        private static int RoundToInterval(int min, int value, int max)
         {
             return Math.Max(min, Math.Min(max, value));
         }
 
-        protected virtual void FinishAct()
+        public virtual void DecreaseSatiety()
         {
+            ThrowIfNotCaptured();
+
             var newSatiety = CurrentSatiety - SatietyDecreaseSpeed;
             CurrentSatiety = Math.Max(MinSatiety, newSatiety);
         }

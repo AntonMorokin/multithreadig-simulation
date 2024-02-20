@@ -60,18 +60,17 @@ namespace MTSim.Map
             return false;
         }
 
-        public bool AnyOfExcept(HashSet<string> typeNames, GameObject except)
+        public bool AnyOfExcept(IReadOnlySet<string> typeNames, GameObject except)
         {
             CheckIfDisposed();
 
             return ExecSafeReading(this, typeNames, except, AnyOfExceptInternal);
         }
 
-        private static bool AnyOfExceptInternal(Location location, HashSet<string> typeNames, GameObject except)
+        private static bool AnyOfExceptInternal(Location location, IReadOnlySet<string> typeNames, GameObject except)
         {
             return location._objects
-                .Where(x => typeNames.Contains(x.TypeName) && x.Id != except.Id)
-                .Any();
+                .Any(x => typeNames.Contains(x.TypeName) && x.Id != except.Id);
         }
 
         public bool AnyOfExcept<T>(T except)
@@ -86,11 +85,10 @@ namespace MTSim.Map
             where T : GameObject
         {
             return location._objects
-                .Where(x => x.TypeName == except.TypeName && x.Id != except.Id)
-                .Any();
+                .Any(x => x.TypeName == except.TypeName && x.Id != except.Id);
         }
 
-        public bool TryGetRandomOfExcept(HashSet<string> typeNames, GameObject except, out GameObject? random)
+        public bool TryGetRandomOfExcept(IReadOnlySet<string> typeNames, GameObject except, out GameObject? random)
         {
             CheckIfDisposed();
 
@@ -100,7 +98,7 @@ namespace MTSim.Map
             return found;
         }
 
-        private static (bool found, GameObject? obj) GetRandomOfExceptInternal(Location location, HashSet<string> typeNames, GameObject except)
+        private static (bool found, GameObject? obj) GetRandomOfExceptInternal(Location location, IReadOnlySet<string> typeNames, GameObject except)
         {
             var objects = location._objects
                 .Where(x => typeNames.Contains(x.TypeName) && x.Id != except.Id)
